@@ -1,9 +1,9 @@
 
 				Authen::PAM 
 
-				Version 0.06
+				Version 0.07
 
-				1999-May-19
+				1999-Jun-08
 
 
 	Copyright (c) 1998,1999 Nikolay Pelov. All rights reserved.
@@ -24,8 +24,8 @@ Before you can build Authen::PAM you need to have the following
 things installed on your system:
 
   * Perl, at least version 5.003_23
-  * This module is known to work with the following implementations of 
-    the PAM library:
+  * This module is known to work with the following or newer 
+    implementations of the PAM library:
     - Linux-PAM
     - Solaris 2.6
     - FreeBSD 3.1
@@ -39,16 +39,10 @@ BUILDING AND INSTALLING THE MODULE
 Assuming you have met all the prerequisites, you can built the module 
 using the following sequence of commands:
 
-    ./configure
+    perl Makefile.PL
     make
     make test
     make install
-
-If the name of your perl executable is different than `perl' and/or
-it is not located in your $PATH then use the following:
-
-    PERL=/path_to_perl/perl_name ./configure
-
 
 If you have any problems in building and installing the module then you
 should first check on the home page of the Authen::PAM module at address
@@ -56,14 +50,16 @@ http://www.cs.kuleuven.ac.be/~pelov/pam/ for the latest development version
 (if any) which could possibly fix your problems. If none is avaliable or the
 problems remain then you can write me a mail which includes the following
 information:
-  * the version of your unix `uname -a'
-  * the version of the perl `perl -V'
+  * the version of your unix - `uname -a'
+  * the version of the perl - `perl -V'
   * if you are on linux:
-    - which distribution you are using
-    - the the version of the pam `ls /lib/libpam*' or `ls /usr/lib/libpam*'
-  * the description of the "login" service from your pam configuration
+    - the name and version of the distribution you are using
+    - the the version of the pam - `ls /lib/libpam*' or `ls /usr/lib/libpam*'
+  * the description of the "login" service from your pam configuration -
     usually found in `/etc/pam.conf' file or in the file `/etc/pam.d/login'
-  * the output of the `./configure', `make' and `make test'
+  * the output of the `perl Makefile.PL', `make' and `make test'
+  * any relevant messages produced by the syslogd daemon -
+    usually found in `/var/log/messages'
 
 
 KNOWN PROBLEMS
@@ -73,11 +69,29 @@ KNOWN PROBLEMS
   ------------
 
   Some of the first versions of the glibc2 libraries have a bug in the
-  dlopen function which will prevent this module from working. If you are 
-  using an original RedHat 5.0 distribution then you probably have this 
-  problem. 
-  I know that the bug is fixed in at least version 2.0.7-6 of the glibc2 
-  library. 
+  dlopen function which will prevent this module from working. If you are
+  using an original RedHat 5.0 distribution then you probably have this
+  problem.
+  I know that the bug is fixed in at least version 2.0.7-6 of the glibc2
+  library.
+
+  Bug in the Solaris 2.6 PAM library
+  ----------------------------------
+
+  There is a known bug in the Solaris 2.6 PAM library for which I have
+  implemented a workaround. This bug is fixed in Solaris 2.7.
+  The name and the version of your OS is determined by looking at the
+  variables 'osname' and 'osvers' from the perl 'Config' module and if they 
+  match 'solaris' and '2.6' then the workaround is activated. 
+  To see the values of this variables you can use `perl -V:osname -V:osvers'.
+
+  If you are building this module on a different version of Solaris (e.g 2.7)
+  and you are planning to use it on Solaris 2.6 or if you are working on
+  Solaris 2.6 and your perl is build on a different version of Solaris
+  (and hence the value of 'osvers' is not '2.6') then you must activate the 
+  workaround manually by running
+
+     perl Makefile.PL -DSTATIC_CONV_FUNC
 
 
   Perl version 5.004_03

@@ -1,5 +1,12 @@
 Revision history for Perl extension Authen::PAM.
 
+0.07  1999-Jun-08
+	- the test script now gets the user name from the real user id
+	- restored back the file Makefile.PL and modified the configuration 
+	  process so that the module is now build in the standard way
+	- added a dummy file d/PAM.pm so that CPAN can find the version
+	  number and the docs (thanks to Graham Barr <gbarr@pobox.com>)
+
 0.06  1999-May-19
 	- the test script now passes to pam the current tty which is needed
 	  by some authentication modules (e.g. pam_securetty)
@@ -25,7 +32,7 @@ Revision history for Perl extension Authen::PAM.
 	- added a call to the pam_authenticate function to the test program
 
 0.03  1998-Oct-06
-	- added support for earliest versions of Linux-PAM without env 
+	- added support for the earlier versions of Linux-PAM without env 
 	  functions (those before version 0.54)
 	- fixed some compiler warnings
 

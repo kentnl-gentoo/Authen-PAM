@@ -1,7 +1,7 @@
 Changes
 MANIFEST
 README
-Makefile.PL.in
+Makefile.PL
 PAM.pm.in
 PAM.xs
 test.pl
@@ -10,4 +10,5 @@ xsubpp-1.9504.patch
 configure
 configure.in
 aclocal.m4
-
+pam.cfg.in
+d/PAM.pm

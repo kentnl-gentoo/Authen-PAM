@@ -48,8 +48,9 @@ sub skip {
   $res = -1;
 
   $pam_service = "login";
-  $login_name = getlogin || getpwuid($<);
+  $login_name = getpwuid($<);
   $tty_name = ttyname(STDIN);
+
   if (!$login_name) {
     print "Can't obtain your login name!\n";
   }
@@ -94,7 +95,8 @@ sub skip {
 #  $res = pam_chauthtok($pamh, 0);
 #  pam_ok(111, $pamh, $res);
 
-  print "---- Now you will be prompted to enter your unix password. On some systems
+  print
+"---- Now you will be prompted to enter your unix password. On some systems
 ---- this test will succeed only if you are running as 'root'.
 ";
 

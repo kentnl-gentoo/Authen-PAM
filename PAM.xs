@@ -11,23 +11,28 @@ extern "C" {
 #include <security/pam_appl.h>
 
 /* 
-   Comment the following line if your PAM library doesn't have the 
-   pam_get/putenv set of functions (i.e. PAM versions before 0.54).
-   Please tell me if you know some automatic way to determine this.
+   Description of the macros used by this file.
+
+   | If your PAM library has the pam_get/putenv functions (PAM versions 
+   | after 0.54) the following macro should be defined.
+   |
+   #define HAVE_PAM_ENV_FUNCTIONS
+
+   | The following macro activates a workaround for a bug in the solaris 2.6
+   | PAM library by setting a pointer to the perl conversation function
+   | before every call to a pam function
+   |
+   #define STATIC_CONV_FUNC
 */
 
 
 /* this is now determined from configure script */
-/* #define HAVE_PAM_ENV_FUNCTIONS */
 
 
 #ifdef sun
 
-  /* The Solaris 2.6 and the Linux header file differ here. */
   #define CONST_VOID	void
   #define CONST_STRUCT	struct
-
-  #define STATIC_CONV_FUNC
 
 #else
 
@@ -152,198 +157,207 @@ char *name;
 int arg;
 {
     errno = 0;
-  
-    /* error codes */
-    if (strcmp(name, "PAM_SUCCESS") == 0)
-	return PAM_SUCCESS;
-    else if (strcmp(name, "PAM_OPEN_ERR") == 0)
-	return PAM_OPEN_ERR;
-    else if (strcmp(name, "PAM_SYMBOL_ERR") == 0)
-	return PAM_SYMBOL_ERR;
-    else if (strcmp(name, "PAM_SERVICE_ERR") == 0)
-	return PAM_SERVICE_ERR;
-    else if (strcmp(name, "PAM_SYSTEM_ERR") == 0)
-	return PAM_SYSTEM_ERR;
-    else if (strcmp(name, "PAM_BUF_ERR") == 0)
-	return PAM_BUF_ERR;
-    else if (strcmp(name, "PAM_PERM_DENIED") == 0)
-	return PAM_PERM_DENIED;
-    else if (strcmp(name, "PAM_AUTH_ERR") == 0)
-        return PAM_AUTH_ERR;
-    else if (strcmp(name, "PAM_CRED_INSUFFICIENT") == 0)
-        return PAM_CRED_INSUFFICIENT;
-    else if (strcmp(name, "PAM_AUTHINFO_UNAVAIL") == 0)
-        return PAM_AUTHINFO_UNAVAIL;
-    else if (strcmp(name, "PAM_USER_UNKNOWN") == 0)
-        return PAM_USER_UNKNOWN;
-    else if (strcmp(name, "PAM_MAXTRIES") == 0)
-        return PAM_MAXTRIES;
-    else if (strcmp(name, "PAM_NEW_AUTHTOK_REQD") == 0 ||
-	     strcmp(name, "PAM_AUTHTOKEN_REQD") == 0)
-#if defined(PAM_NEW_AUTHTOK_REQD)
-        return PAM_NEW_AUTHTOK_REQD;
-#elif defined(PAM_AUTHTOKEN_REQD)
-	return PAM_AUTHTOKEN_REQD;
-#else
-	goto not_there;
-#endif
-    else if (strcmp(name, "PAM_ACCT_EXPIRED") == 0)
-        return PAM_ACCT_EXPIRED;
-    else if (strcmp(name, "PAM_SESSION_ERR") == 0)
-        return PAM_SESSION_ERR;
-    else if (strcmp(name, "PAM_CRED_UNAVAIL") == 0)
-        return PAM_CRED_UNAVAIL;
-    else if (strcmp(name, "PAM_CRED_EXPIRED") == 0)
-        return PAM_CRED_EXPIRED;
-    else if (strcmp(name, "PAM_CRED_ERR") == 0)
-        return PAM_CRED_ERR;
-    else if (strcmp(name, "PAM_NO_MODULE_DATA") == 0)
-        return PAM_NO_MODULE_DATA;
-    else if (strcmp(name, "PAM_CONV_ERR") == 0)
-        return PAM_CONV_ERR;
-    else if (strcmp(name, "PAM_AUTHTOK_ERR") == 0)
-        return PAM_AUTHTOK_ERR;
-    else if (strcmp(name, "PAM_AUTHTOK_RECOVER_ERR") == 0 ||
-	     strcmp(name, "PAM_AUTHTOK_RECOVERY_ERR") == 0)
-#if defined(PAM_AUTHTOK_RECOVER_ERR)
-        return PAM_AUTHTOK_RECOVER_ERR;
-#elif defined(PAM_AUTHTOK_RECOVERY_ERR)
-	return PAM_AUTHTOK_RECOVERY_ERR;
-#else
-	goto not_there;
-#endif
-    else if (strcmp(name, "PAM_AUTHTOK_LOCK_BUSY") == 0)
-        return PAM_AUTHTOK_LOCK_BUSY;
-    else if (strcmp(name, "PAM_AUTHTOK_DISABLE_AGING") == 0)
-        return PAM_AUTHTOK_DISABLE_AGING;
-    else if (strcmp(name, "PAM_TRY_AGAIN") == 0)
-        return PAM_TRY_AGAIN;
-    else if (strcmp(name, "PAM_IGNORE") == 0)
-        return PAM_IGNORE;
-    else if (strcmp(name, "PAM_ABORT") == 0)
-        return PAM_ABORT;
-    else if (strcmp(name, "PAM_AUTHTOK_EXPIRED") == 0)
-#if defined(PAM_AUTHTOK_EXPIRED)
-        return PAM_AUTHTOK_EXPIRED;
-#else
-	goto not_there;
-#endif
-    else if (strcmp(name, "PAM_BAD_ITEM") == 0)
-#if defined(PAM_BAD_ITEM)
-	return PAM_BAD_ITEM;
-#else
-	goto not_there;
-#endif
 
+    if (strncmp(name, "PAM_", 4) == 0) {
+      name = &name[4];
+      /* error codes */
+      if (strcmp(name, "SUCCESS") == 0)
+	  return PAM_SUCCESS;
+      else if (strcmp(name, "OPEN_ERR") == 0)
+	  return PAM_OPEN_ERR;
+      else if (strcmp(name, "SYMBOL_ERR") == 0)
+	  return PAM_SYMBOL_ERR;
+      else if (strcmp(name, "SERVICE_ERR") == 0)
+	  return PAM_SERVICE_ERR;
+      else if (strcmp(name, "SYSTEM_ERR") == 0)
+	  return PAM_SYSTEM_ERR;
+      else if (strcmp(name, "BUF_ERR") == 0)
+	  return PAM_BUF_ERR;
+      else if (strcmp(name, "PERM_DENIED") == 0)
+	  return PAM_PERM_DENIED;
+      else if (strcmp(name, "AUTH_ERR") == 0)
+	  return PAM_AUTH_ERR;
+      else if (strcmp(name, "CRED_INSUFFICIENT") == 0)
+	  return PAM_CRED_INSUFFICIENT;
+      else if (strcmp(name, "AUTHINFO_UNAVAIL") == 0)
+	  return PAM_AUTHINFO_UNAVAIL;
+      else if (strcmp(name, "USER_UNKNOWN") == 0)
+	  return PAM_USER_UNKNOWN;
+      else if (strcmp(name, "MAXTRIES") == 0)
+	  return PAM_MAXTRIES;
+      else if (strcmp(name, "NEW_AUTHTOK_REQD") == 0 ||
+	       strcmp(name, "AUTHTOKEN_REQD") == 0)
+      #if defined(PAM_NEW_AUTHTOK_REQD)
+	  return PAM_NEW_AUTHTOK_REQD;
+      #elif defined(PAM_AUTHTOKEN_REQD)
+	  return PAM_AUTHTOKEN_REQD;
+      #else
+	  goto not_there;
+      #endif
+      else if (strcmp(name, "ACCT_EXPIRED") == 0)
+	  return PAM_ACCT_EXPIRED;
+      else if (strcmp(name, "SESSION_ERR") == 0)
+	  return PAM_SESSION_ERR;
+      else if (strcmp(name, "CRED_UNAVAIL") == 0)
+	  return PAM_CRED_UNAVAIL;
+      else if (strcmp(name, "CRED_EXPIRED") == 0)
+	  return PAM_CRED_EXPIRED;
+      else if (strcmp(name, "CRED_ERR") == 0)
+	  return PAM_CRED_ERR;
+      else if (strcmp(name, "NO_MODULE_DATA") == 0)
+	  return PAM_NO_MODULE_DATA;
+      else if (strcmp(name, "CONV_ERR") == 0)
+	  return PAM_CONV_ERR;
+      else if (strcmp(name, "AUTHTOK_ERR") == 0)
+	  return PAM_AUTHTOK_ERR;
+      else if (strcmp(name, "AUTHTOK_RECOVER_ERR") == 0 ||
+	       strcmp(name, "AUTHTOK_RECOVERY_ERR") == 0)
+      #if defined(PAM_AUTHTOK_RECOVER_ERR)
+	  return PAM_AUTHTOK_RECOVER_ERR;
+      #elif defined(PAM_AUTHTOK_RECOVERY_ERR)
+	  return PAM_AUTHTOK_RECOVERY_ERR;
+      #else
+	  goto not_there;
+      #endif
+      else if (strcmp(name, "AUTHTOK_LOCK_BUSY") == 0)
+	  return PAM_AUTHTOK_LOCK_BUSY;
+      else if (strcmp(name, "AUTHTOK_DISABLE_AGING") == 0)
+	  return PAM_AUTHTOK_DISABLE_AGING;
+      else if (strcmp(name, "TRY_AGAIN") == 0)
+	  return PAM_TRY_AGAIN;
+      else if (strcmp(name, "IGNORE") == 0)
+	  return PAM_IGNORE;
+      else if (strcmp(name, "ABORT") == 0)
+	  return PAM_ABORT;
+      else if (strcmp(name, "AUTHTOK_EXPIRED") == 0)
+      #if defined(PAM_AUTHTOK_EXPIRED)
+	  return PAM_AUTHTOK_EXPIRED;
+      #else
+	  goto not_there;
+      #endif
+      else if (strcmp(name, "BAD_ITEM") == 0)
+      #if defined(PAM_BAD_ITEM)
+	  return PAM_BAD_ITEM;
+      #else
+	  goto not_there;
+      #endif
 
-    /* set/get_item constants */
-    else if (strcmp(name, "PAM_SERVICE") == 0)
-	return PAM_SERVICE;
-    else if (strcmp(name, "PAM_USER") == 0)
-        return PAM_USER;
-    else if (strcmp(name, "PAM_TTY") == 0)
-        return PAM_TTY;
-    else if (strcmp(name, "PAM_RHOST") == 0)
-        return PAM_RHOST;
-    else if (strcmp(name, "PAM_CONV") == 0)
-        return PAM_CONV;
-    /* module flags */
-/*
-    else if (strcmp(name, "PAM_AUTHTOK") == 0)
-        return PAM_CONV;
-    else if (strcmp(name, "PAM_OLDAUTHTOK") == 0)
-        return PAM_CONV;
-*/
+      /* set/get_item constants */
+      else if (strcmp(name, "SERVICE") == 0)
+	  return PAM_SERVICE;
+      else if (strcmp(name, "USER") == 0)
+	  return PAM_USER;
+      else if (strcmp(name, "TTY") == 0)
+	  return PAM_TTY;
+      else if (strcmp(name, "RHOST") == 0)
+	  return PAM_RHOST;
+      else if (strcmp(name, "CONV") == 0)
+	  return PAM_CONV;
+      /* module flags */
+      /*
+      else if (strcmp(name, "AUTHTOK") == 0)
+	  return PAM_CONV;
+      else if (strcmp(name, "OLDAUTHTOK") == 0)
+	  return PAM_CONV;
+      */
+      else if (strcmp(name, "RUSER") == 0)
+	  return PAM_RUSER;
+      else if (strcmp(name, "USER_PROMPT") == 0)
+	  return PAM_USER_PROMPT;
+      else if (strcmp(name, "FAIL_DELAY") == 0)
+      #if defined(PAM_FAIL_DELAY)
+	  return PAM_FAIL_DELAY;
+      #else
+	  goto not_there;
+      #endif
 
-    else if (strcmp(name, "PAM_RUSER") == 0)
-	return PAM_RUSER;
-    else if (strcmp(name, "PAM_USER_PROMPT") == 0)
-	return PAM_USER_PROMPT;
+      /* global flag */
+      else if (strcmp(name, "SILENT") == 0)
+	  return PAM_SILENT;
+      /* pam_authenticate falgs */
+      else if (strcmp(name, "DISALLOW_NULL_AUTHTOK") == 0)
+	  return PAM_DISALLOW_NULL_AUTHTOK;
+      /* pam_set_cred flags */
+      else if (strcmp(name, "ESTABLISH_CRED") == 0 ||
+	       strcmp(name, "CRED_ESTABLISH") == 0)
+      #if defined(PAM_ESTABLISH_CRED)
+	  return PAM_ESTABLISH_CRED;
+      #elif defined(PAM_CRED_ESTABLISH)
+	  return PAM_CRED_ESTABLISH;
+      #else
+	  goto not_there;
+      #endif
+      else if (strcmp(name, "DELETE_CRED") == 0 ||
+	       strcmp(name, "CRED_DELETE") == 0)
+      #if defined(PAM_DELETE_CRED)
+	  return PAM_DELETE_CRED;
+      #elif defined(PAM_CRED_DELETE)
+	  return PAM_CRED_DELETE;
+      #else
+	  goto not_there;
+      #endif
+      else if (strcmp(name, "REINITIALIZE_CRED") == 0 ||
+	       strcmp(name, "CRED_REINITIALIZE") == 0)
+      #if defined(PAM_REINITIALIZE_CRED)
+	  return PAM_REINITIALIZE_CRED;
+      #elif defined(PAM_CRED_REINITIALIZE)
+	  return PAM_CRED_REINITIALIZE;
+      #else
+	  goto not_there;
+      #endif
+      else if (strcmp(name, "REFRESH_CRED") == 0 ||
+	       strcmp(name, "CRED_REFRESH") == 0)
+      #if defined(PAM_REFRESH_CRED)
+	  return PAM_REFRESH_CRED;
+      #elif defined(PAM_CRED_REFRESH)
+	  return PAM_CRED_REFRESH;
+      #else
+	  goto not_there;
+      #endif
+      /* pam_chauthtok flags */
+      else if (strcmp(name, "CHANGE_EXPIRED_AUTHTOK") == 0)
+	  return PAM_CHANGE_EXPIRED_AUTHTOK;
 
-    /* global flag */
-    else if (strcmp(name, "PAM_SILENT") == 0)
-        return PAM_SILENT;
-    /* pam_authenticate falgs */
-    else if (strcmp(name, "PAM_DISALLOW_NULL_AUTHTOK") == 0)
-	return PAM_DISALLOW_NULL_AUTHTOK;
-    /* pam_set_cred flags */
-    else if (strcmp(name, "PAM_ESTABLISH_CRED") == 0 ||
-	     strcmp(name, "PAM_CRED_ESTABLISH") == 0)
-#if defined(PAM_ESTABLISH_CRED)
-        return PAM_ESTABLISH_CRED;
-#elif defined(PAM_CRED_ESTABLISH)
-	return PAM_CRED_ESTABLISH;
-#else
-	goto not_there;
-#endif
-    else if (strcmp(name, "PAM_DELETE_CRED") == 0 ||
-	     strcmp(name, "PAM_CRED_DELETE") == 0)
-#if defined(PAM_DELETE_CRED)
-        return PAM_DELETE_CRED;
-#elif defined(PAM_CRED_DELETE)
-	return PAM_CRED_DELETE;
-#else
-	goto not_there;
-#endif
-    else if (strcmp(name, "PAM_REINITIALIZE_CRED") == 0 ||
-	     strcmp(name, "PAM_CRED_REINITIALIZE") == 0)
-#if defined(PAM_REINITIALIZE_CRED)
-        return PAM_REINITIALIZE_CRED;
-#elif defined(PAM_CRED_REINITIALIZE)
-	return PAM_CRED_REINITIALIZE;
-#else
-	goto not_there;
-#endif
-    else if (strcmp(name, "PAM_REFRESH_CRED") == 0 ||
-	     strcmp(name, "PAM_CRED_REFRESH") == 0)
-#if defined(PAM_REFRESH_CRED)
-        return PAM_REFRESH_CRED;
-#elif defined(PAM_CRED_REFRESH)
-	return PAM_CRED_REFRESH;
-#else
-	goto not_there;
-#endif
-    /* pam_chauthtok flags */
-    else if (strcmp(name, "PAM_CHANGE_EXPIRED_AUTHTOK") == 0)
-        return PAM_CHANGE_EXPIRED_AUTHTOK;
+      /* message style constants */
+      else if (strcmp(name, "PROMPT_ECHO_OFF") == 0)
+	  return PAM_PROMPT_ECHO_OFF;
+      else if (strcmp(name, "PROMPT_ECHO_ON") == 0)
+	  return PAM_PROMPT_ECHO_ON;
+      else if (strcmp(name, "ERROR_MSG") == 0)
+	  return PAM_ERROR_MSG;
+      else if (strcmp(name, "TEXT_INFO") == 0)
+	  return PAM_TEXT_INFO;
+      else if (strcmp(name, "RADIO_TYPE") == 0)
+      #if defined(PAM_RADIO_TYPE)
+	  return PAM_RADIO_TYPE;
+      #else
+	  goto not_there;
+      #endif
+    } 
+    else if (strncmp(name, "HAVE_PAM_", 9) == 0) {
+      name = &name[9];
 
-    /* message style constants */
-    else if (strcmp(name, "PAM_PROMPT_ECHO_OFF") == 0)
-        return PAM_PROMPT_ECHO_OFF;
-    else if (strcmp(name, "PAM_PROMPT_ECHO_ON") == 0)
-        return PAM_PROMPT_ECHO_ON;
-    else if (strcmp(name, "PAM_ERROR_MSG") == 0)
-        return PAM_ERROR_MSG;
-    else if (strcmp(name, "PAM_TEXT_INFO") == 0)
-        return PAM_TEXT_INFO;
-    else if (strcmp(name, "PAM_RADIO_TYPE") == 0)
-#if defined(PAM_RADIO_TYPE)
-        return PAM_RADIO_TYPE;
-#else
-	goto not_there;
-#endif
-
-    /* additional features */
-    else if (strcmp(name, "HAVE_PAM_FAIL_DELAY") == 0)
-#if defined(HAVE_PAM_FAIL_DELAY)
-	return 1;
-#else
-	return 0;
-#endif
-    else if (strcmp(name, "HAVE_PAM_ENV_FUNCTIONS") == 0)
-#if defined(HAVE_PAM_ENV_FUNCTIONS)
-	return 1;
-#else
-	return 0;
-#endif
-/*
-    else if (strcmp(name, "HAVE_PAM_SYSTEM_LOG") == 0)
-#if defined(HAVE_PAM_SYSTEM_LOG)
-	return 1;
-#else
-	return 0;
-#endif
-*/
+      if (strcmp(name, "FAIL_DELAY") == 0)
+      #if defined(HAVE_PAM_FAIL_DELAY)
+	  return 1;
+      #else
+	  return 0;
+      #endif
+      else if (strcmp(name, "ENV_FUNCTIONS") == 0)
+      #if defined(HAVE_PAM_ENV_FUNCTIONS)
+	  return 1;
+      #else
+	  return 0;
+      #endif
+      /*
+      else if (strcmp(name, "HAVE_PAM_SYSTEM_LOG") == 0)
+      #if defined(HAVE_PAM_SYSTEM_LOG)
+	  return 1;
+      #else
+	  return 0;
+      #endif
+      */
+    }
 
     errno = EINVAL;
     return 0;
@@ -351,6 +365,20 @@ int arg;
 not_there:
     errno = ENOENT;
     return 0;
+}
+
+/*
+ * We must also handle setting a delay function with a prototype:
+ *
+ *     void (*fail_delay)(int status, unsigned int delay);
+ *
+ * by a call to pam_set_item with type PAM_FAIL_DELAY
+ */
+void
+my_fail_delay(status, delay)
+int status;
+unsigned int delay;
+{
 }
 
 
@@ -384,6 +412,11 @@ pam_set_item(pamh, item_type, item)
 	    else
 	        RETVAL = res;
 	  }
+#if defined(PAM_FAIL_DELAY)
+          else if (item_type == PAM_FAIL_DELAY) {
+	      croak("setting a delay function is still not implemented");
+	  }
+#endif
 	  else
 	    RETVAL = pam_set_item( pamh, item_type, item);
 	OUTPUT:
@@ -406,6 +439,11 @@ pam_get_item(pamh, item_type, item)
 	          sv_setsv(item, conv_st->appdata_ptr);
 	      RETVAL = res;
 	  }
+#if defined(PAM_FAIL_DELAY)
+          else if (item_type == PAM_FAIL_DELAY) {
+	      croak("getting a delay function is still not implemented");
+ 	  }
+#endif
 	  else {
 	      RETVAL = pam_get_item( pamh, item_type, 
 					(CONST_VOID **)&c);

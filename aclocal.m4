@@ -1,24 +1,4 @@
 dnl-----------------------------------
-dnl PERL_PROG_CHECK
-dnl
-AC_DEFUN(PERL_PROG_CHECK,[
-AC_CHECK_PROG(PERL,perl,perl)
-if test -z "$PERL"; then
-  AC_MSG_ERROR([perl not found in \$PATH])
-fi
-])
-
-dnl-----------------------------------
-dnl PERL_DEF(VARIABLE, PERL_VARIABLE)
-dnl
-AC_DEFUN(PERL_DEF,[
-if test -z "[$]$1"; then
-    AC_CACHE_CHECK(for $1 from perl variable $2, ac_cv_perl_def_$1,[
-    $1=`$PERL -e 'use Config; print $Config{'$2'};'`
-    ac_cv_perl_def_$1="[$]$1"])
-fi])
-
-dnl-----------------------------------
 dnl PAM_LIB_DL
 dnl
 AC_DEFUN(PAM_LIB_DL,
@@ -58,5 +38,5 @@ if test $pam_cv_decl_rtld_global = yes; then
 else
     DL_LOAD_FLAGS=''
 fi
-AC_SUBST(DL_LOAD_FLAGS)dnl
+AC_SUBST(DL_LOAD_FLAGS)
 ])
