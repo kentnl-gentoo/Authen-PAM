@@ -1,7 +1,7 @@
 package Authen::PAM;
 
 use strict;
-no strict "subs";
+#no strict "subs";
 
 use Carp;
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK $AUTOLOAD);
@@ -21,29 +21,31 @@ require DynaLoader;
 	pam_strerror
 	pam_getenv pam_putenv pam_getenvlist
 
-
 	PAM_SUCCESS PAM_PERM_DENIED PAM_BUF_ERR PAM_BAD_ITEM PAM_AUTH_ERR
 
 	PAM_CRED_INSUFFICIENT PAM_AUTHINFO_UNAVAIL PAM_USER_UNKNOWN
 	PAM_MAXTRIES PAM_CRED_UNAVAIL PAM_CRED_EXPIRED PAM_CRED_ERR
-	PAM_NEW_AUTHTOK_REQD PAM_ACCT_EXPIRED PAM_AUTHTOK_ERR
-	PAM_AUTHTOK_RECOVER_ERR PAM_AUTHTOK_LOCK_BUSY
-	PAM_AUTHTOK_DISABLE_AGING PAM_TRY_AGAIN PAM_ABORT
+	PAM_AUTHTOKEN_REQD PAM_NEW_AUTHTOK_REQD PAM_ACCT_EXPIRED 
+	PAM_AUTHTOK_ERR PAM_AUTHTOK_RECOVER_ERR PAM_AUTHTOK_RECOVERY_ERR
+	PAM_AUTHTOK_LOCK_BUSY PAM_AUTHTOK_DISABLE_AGING PAM_TRY_AGAIN 
+	PAM_ABORT
 
 	PAM_SERVICE PAM_USER PAM_TTY PAM_RHOST PAM_CONV PAM_RUSER 
-	PAM_USER_PROMPT
+	PAM_USER_PROMPT PAM_AUTHTOK PAM_OLDAUTHTOK
 
 	PAM_SILENT PAM_DISALLOW_NULL_AUTHTOK
 
 	PAM_ESTABLISH_CRED PAM_DELETE_CRED PAM_REINITIALIZE_CRED
 	PAM_REFRESH_CRED PAM_CHANGE_EXPIRED_AUTHTOK
+	PAM_CRED_ESTABLISH PAM_CRED_DELETE PAM_CRED_REINITIALIZE
+	PAM_CRED_REFRESH
 
 	PAM_PROMPT_ECHO_OFF PAM_PROMPT_ECHO_ON PAM_ERROR_MSG PAM_TEXT_INFO
 
-	HAVE_PAM_FAIL_DELAY HAVE_PAM_SYSTEM_LOG
+	HAVE_PAM_FAIL_DELAY
 );
 
-$VERSION = '0.01';
+$VERSION = '0.02';
 
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()
@@ -89,16 +91,14 @@ sub new {
     my $class = ref($this) || $this;
     my $pamh;
     my $retval = pam_start (@_, $pamh);
-    if ($retval != PAM_SUCCESS) {
-	return $retval;
-    }
-    bless \$pamh, $class;
-    return \$pamh;
+    return $retval if $retval != &PAM_SUCCESS;
+    bless $pamh, $class;
+    return $pamh;
 }
 
 sub DESTROY {
     my $pamh = shift;
-    my $retval = pam_end($$pamh, 0);
+    my $retval = pam_end($pamh, 0);
 }
 
 sub pam_default_conv {
@@ -110,24 +110,24 @@ sub pam_default_conv {
         my $ans = "";
 
         print $msg;
-        push @res, PAM_SUCCESS;
+        push @res, &PAM_SUCCESS;
 
-        if ($code == PAM_PROMPT_ECHO_OFF ) {
+        if ($code == &PAM_PROMPT_ECHO_OFF ) {
             system "stty -echo";
             chomp( $ans = <STDIN> ); print "\n";
             system "stty echo";
         }
-        elsif ($code == PAM_PROMPT_ECHO_ON ) { chomp( $ans = <STDIN> ); }
-        elsif ($code == PAM_ERROR_MSG )      { print "\n"; }
-        elsif ($code == PAM_TEXT_INFO )      { print "\n"; }
+        elsif ($code == &PAM_PROMPT_ECHO_ON ) { chomp( $ans = <STDIN> ); }
+        elsif ($code == &PAM_ERROR_MSG )      { print "\n"; }
+        elsif ($code == &PAM_TEXT_INFO )      { print "\n"; }
         push @res, $ans;
     }
-    push @res, PAM_SUCCESS;
+    push @res, &PAM_SUCCESS;
     return @res;
 }
 
 sub pam_start {
-    return _pam_start(@_[0], @_[1], @_[2], @_[3]) if @_ == 4;
+    return _pam_start(@_) if @_ == 4;
     return _pam_start(@_[0], @_[1], \&pam_default_conv, @_[2]) if @_ == 3;
     croak("Wrong number of arguments in pam_start function");
 }
@@ -166,16 +166,60 @@ Authen::PAM - Perl interface to PAM library
   $val = pam_getenv($pamh, $name);
   %env = pam_getenvlist($pamh);
 
+  if (HAVE_PAM_FAIL_DELAY)
+	$retval = pam_fail_delay($pamh, $musec_delay);
+
 =head1 DESCRIPTION
 
 The I<Authen::PAM> module provides a Perl interface to the I<PAM>
 library. The only difference with the standart PAM interface is that 
 instead of passing a pam_conv struct which has an additional 
 context parameter appdata_ptr, you must only give an address to a 
-conversation function written in Perl (see below). You can pass
-a context to the conversation function using the Perl function local.
+conversation function written in Perl (see below). 
 If you use the 3 argument version of pam_start then a default conversation
 function is used (Authen::PAM::pam_default_conv).
+
+The $flags argument is optional for all functions which use it
+except for pam_setcred. The $pam_status argument is also optional for
+pam_end function.
+
+The names of some constants from the PAM library have changed over the
+time. You can use any of the known names for a given constant although
+it is advisable to use the latest one.
+
+When this module supports some of the additional features of the PAM
+library (e.g. pam_fail_delay) then the coresponding HAVE_PAM_XXX
+constant will have a value 1 otherwise it will return 0.
+
+=head2 Object Oriented Style
+
+If you prefer to use an object oriented style for accessing the PAM
+library you can use the following interface:
+
+  $pamh = new Authen::PAM($service_name, $user);
+  $pamh = new Authen::PAM($service_name, $user, $conv_func);
+
+  $retval = $pamh->pam_authenticate($flags);
+  $retval = $pamh->pam_setcred($flags);
+  $retval = $pamh->pam_acct_mgmt($flags);
+  $retval = $pamh->pam_open_session($flags);
+  $retval = $pamh->pam_close_session($flags);
+  $retval = $pamh->pam_chauthtok($flags);
+
+  $error_str = $pamh->pam_strerror($errnum);
+
+  $retval = $pamh->pam_set_item($item_type, $item);
+  $retval = $pamh->pam_get_item($item_type, $item);
+
+  $retval = $pamh->pam_putenv($name_value);
+  $val = $pamh->pam_getenv($name);
+  %env = $pamh->pam_getenvlist;
+
+The constructor new will call the pam_start function and if successfull
+will return an object reference. Otherwise the $pamh will contain the
+error number returned by pam_start.
+The pam_end function will be called automatically when the object is no
+longer referenced.
 
 =head2 Examples
 
@@ -186,9 +230,16 @@ user:
 
   $login_name = getlogin || getpwuid($<);
 
-  pam_start("passwd", $login_name, \&pam_default_conv, $pamh);
-  pam_chauthtok($pamh, 0);
-  pam_end($pamh, 0);
+  pam_start("passwd", $login_name, $pamh);
+  pam_chauthtok($pamh);
+  pam_end($pamh);
+
+
+or the same thing but using OO style:
+
+  $pamh = new Authen::PAM("passwd", $login_name);
+  $pamh->pam_chauthtok;
+  $pamh = 0;  # Force perl to call the destructor for the $pamh
 
 =head2 Conversation function format
 
@@ -199,7 +250,7 @@ and must return a list with the same number of pairs ($resp_retcode, $resp)
 with replies to the input messages. For now the $resp_retcode is not used 
 and must be always set to 0.  In addition the user must append to
 the end of the resulting list the return code of the conversation function
-(usualy PAM_SUCCESS).
+(usually PAM_SUCCESS).
 
 Here is a sample form of the PAM conversation function:
 
@@ -224,13 +275,14 @@ sub pam_conv_func {
 =head1 COMPATIBILITY
 
 This module was tested with the following versions of the Linux-PAM library:
-0.56, 0.59 and 0.65. This means that it supports the pre 0.58 interface of the 
-PAM functions and constants as well as the latest (0.65) constant 
-definitions. 
+0.56, 0.59 and 0.65.
 
 This module still does not support some of the new Linux-PAM 
 functions such as pam_system_log. This will be added in the near future
 if necessary.
+
+Lupe Christoph <lupe@alanya.m.isar.de> ported this module to work
+with Solaris 2.6 PAM library.
 
 =head1 AUTHOR
 

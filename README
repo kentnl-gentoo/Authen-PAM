@@ -1,8 +1,8 @@
                                   Authen::PAM 
 
-                                  Version 0.01
+                                  Version 0.02
 
-                                  04 May 1998
+                                  09 Jun 1998
 
 
 	Copyright (c) 1998 Nikolay Pelov. All rights reserved.
@@ -23,7 +23,7 @@ Before you can build Authen::PAM you need to have the following
 thing installed on your system:
 
     * Perl, version 5.004_04
-    * Linux-PAM library
+    * PAM library (either Linux-PAM or Solaris 2.6 PAM library)
 
   The Linux-PAM home page is http://www.kernel.org/pub/linux/libs/pam.
 
@@ -95,9 +95,10 @@ following patch:
      }
 
 
-
 AUTHOR
 ------
 
 Nikolay Pelov <nikip@iname.com>
 
+The original distribution site of this module is 
+http://serv.iinf.bg/~nikip

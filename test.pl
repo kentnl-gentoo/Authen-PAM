@@ -32,7 +32,7 @@ $pam_service = "passwd";
   $login_name = getlogin || getpwuid($<);
   ok(2, $login_name);
 
-#  $res = pam_start($pam_service, $login_name, \&pam_default_conv, $pamh);
+#  $res = Authen::PAM::_pam_start($pam_service, $login_name, \&Authen::PAM::pam_default_conv, $pamh);
   $res = pam_start($pam_service, $login_name, $pamh);
   ok(3, $res == PAM_SUCCESS);
 
@@ -59,5 +59,13 @@ $pam_service = "passwd";
 
   $res = pam_end($pamh, 0);
   ok(9, $res == PAM_SUCCESS);
+
+  $pamh = new Authen::PAM($pam_service, $login_name);
+  ok(10, ref($pamh));
+
+#  $res = $pamh->pam_chauthtok;
+#  print "chauthtok returned ", $pamh->pam_strerror($res);
+
+  $pamh = 0;
 
   1;
