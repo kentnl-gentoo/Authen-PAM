@@ -23,10 +23,16 @@ print "ok 1\n";
 # (correspondingly "not ok 13") depending on the success of chunk 13
 # of the test code):
 
+my $failures = 0;
+
 sub ok {
     my ($no, $ok) = @_ ;
-    print "ok $no\n" if $ok ;
-    print "not ok $no\n" unless $ok ;
+    if ($ok) {
+      print "ok $no\n";
+    } else
+    {
+      print "not ok $no\n"; $failures++;
+    }
 }
 
 sub pam_ok {
@@ -34,9 +40,11 @@ sub pam_ok {
     if ($pam_ret_val != PAM_SUCCESS()) {
         print "not ok $no ($pam_ret_val - ",
 	  pam_strerror($pamh, $pam_ret_val),")\n";
+	$failures++;
     }
     elsif (defined($other_test) && !$other_test) {
         print "not ok $no\n";
+	$failures++;
     }
     else {
         print "ok $no\n";
@@ -124,16 +132,18 @@ sub my_fail_delay {
   }
 
   $res = pam_authenticate($pamh, 0);
-  pam_ok(10, $pamh, $res);
+#  $res = pam_chauthtok($pamh);
+  {
+    my $old_failures = $failures;
+    pam_ok(10, $pamh, $res);
+    $failures = $old_failures; # Authentication failures don't count
+  }
 
 #  if (HAVE_PAM_FAIL_DELAY()) {
 #    ok(12, $res == $fd_status);
 #  } else {
 #    skip(12, 'custom fail delay function is not supported by your PAM library');
 #  }
-
-#  $res = pam_chauthtok($pamh, 0);
-#  pam_ok(10.1, $pamh, $res);
 
   $res = pam_end($pamh, 0);
   ok(11, $res == PAM_SUCCESS());
@@ -150,4 +160,4 @@ sub my_fail_delay {
 
   print "\n";
 
-1;
+  exit($failures);

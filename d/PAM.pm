@@ -1,6 +1,6 @@
 #This is a dummy file so CPAN will find a VERSION
 package Authen::PAM;
-$VERSION = "0.12";
+$VERSION = "0.13";
 #This is to make sure require will return an error
 0;
 __END__
@@ -14,7 +14,7 @@ Authen::PAM - Perl interface to PAM library
   use Authen::PAM;
 
   $res = pam_start($service_name, $user, $pamh);
-  $res = pam_start($service_name, $user, \my_conv_func, $pamh);
+  $res = pam_start($service_name, $user, \&my_conv_func, $pamh);
   $res = pam_end($pamh, $pam_status);
 
   $res = pam_authenticate($pamh, $flags);
@@ -37,7 +37,7 @@ Authen::PAM - Perl interface to PAM library
 
   if (HAVE_PAM_FAIL_DELAY()) {
       $res = pam_fail_delay($pamh, $musec_delay);
-      $res = pam_set_item($pamh, PAM_FAIL_DELAY(), \my_fail_delay_func);
+      $res = pam_set_item($pamh, PAM_FAIL_DELAY(), \&my_fail_delay_func);
   }
 
 =head1 DESCRIPTION
@@ -76,7 +76,7 @@ library here is the interface:
   use Authen::PAM qw(:constants);
 
   $pamh = new Authen::PAM($service_name, $user);
-  $pamh = new Authen::PAM($service_name, $user, \my_conv_func);
+  $pamh = new Authen::PAM($service_name, $user, \&my_conv_func);
 
   ref($pamh) || die "Error code $pamh during PAM init!";
 
@@ -154,9 +154,6 @@ Here is a sample form of the PAM conversation function:
 
 =head1 COMPATIBILITY
 
-This module was tested with the following versions of the Linux-PAM library:
-0.50, 0.56, 0.59 and 0.65.
-
 The following constant names: PAM_AUTHTOKEN_REQD, PAM_CRED_ESTABLISH,
 PAM_CRED_DELETE, PAM_CRED_REINITIALIZE, PAM_CRED_REFRESH are used by
 some older version of the Linux-PAM library and are not exported by
@@ -177,7 +174,7 @@ Nikolay Pelov nikip@iname.com
 
 =head1 COPYRIGHT
 
-Copyright (c) 1998-2000 Nikolay Pelov. All rights reserved. This
+Copyright (c) 1998-2002 Nikolay Pelov. All rights reserved. This
 program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
 

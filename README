@@ -1,12 +1,12 @@
 
 				Authen::PAM 
 
-				Version 0.12
+				Version 0.13
 
-				2001-Jul-10
+				2002-Feb-25
 
 
-	Copyright (c) 1998-2000 Nikolay Pelov. All rights reserved.
+	Copyright (c) 1998-2002 Nikolay Pelov. All rights reserved.
 	This program is free software; you can redistribute it and/or
 	modify it under the same terms as Perl itself.
 
@@ -31,12 +31,14 @@ things installed on your system:
     - Linux-PAM  <http://www.kernel.org/pub/linux/libs/pam/>
     - Solaris 2.6
     - FreeBSD 3.1
+    - OpenPAM <http://openpam.sourceforge.net/>
+
 
 BUILDING AND INSTALLING THE MODULE
 ==================================
 
 Assuming you have met all the prerequisites, you can built the module 
-using the following sequence of commands:
+using the standard sequence of commands:
 
     perl Makefile.PL
     make
@@ -60,7 +62,7 @@ http://www.cs.kuleuven.ac.be/~pelov/pam/ for the latest development version
 problems remain then you can write me a mail which includes the following
 information:
   * the version of your unix - `uname -a'
-  * the version of the perl - `perl -V'
+  * the version of the perl - `perl -v'
   * if you are on linux:
     - the name and version of the distribution you are using
     - the version of the pam - `ls /lib/libpam.so*' or `ls /usr/lib/libpam.so*'
@@ -77,14 +79,52 @@ information:
 KNOWN PROBLEMS
 ==============
 
+  Missing PAM header files
+  ------------------------
+
+  I know that this is trivial, but some people actually report this.
+  If you get an error like
+	PAM.xs:11: security/pam_appl.h: No such file or directory
+  this means that either you don't have the PAM library installed on
+  your system or that only the header files are missing. If your
+  distribution provides the PAM library as packages then you should
+  check that you have also installed the pam-dev or pam-devel package.
+
+
+  FreeBSD 4.x
+  -----------
+  Several people have reported the following error during 'make test':
+    not ok 10 (28 - Module is unknown)
+  I've tracked down the problem to the dynamic loader of FreeBSD not
+  exporting some symbols in dlopen()'d modules. I've submitted a bug 
+  report - http://www.freebsd.org/cgi/query-pr.cgi?pr=25059
+  On the above URL there are also instructions on how to reproduce the
+  problem.  Unless this is being fixed then it is very likely that the
+  Authen::PAM module will not be able to work there. 
+  Lobby the BSD developers.
+
+
+  Solaris 2.8
+  -----------
+  Some users are reporting the following error during 'make test':
+    Segmentation Fault - core dumped
+    make: *** [test_dynamic] Error 139
+  The problem seems to be related with the use of Kerberos
+  authentication (pam_krb5 or pam_krb54). At this moment I don't have
+  any explanation for it.
+
+
+  Login Restrictions
+  ------------------
   Most of the current configurations of the 'login' service include a
   module 'pam_securetty' or 'pam_access' which restrict the login of 
-  some users depending on the tty or the host name they are logging from.
-  The configuration files of these two modules are /etc/securetty and
-  /etc/security/access.conf respectively.
-  So if you are running 'make test', especially as a root, and get an error 
-  '(Authentication failure)' on test 10 then this very well might be
-  the problem.
+  some users (especially root) depending on the tty or the host name
+  they are logging from. The configuration files of these two modules
+  are /etc/securetty and  /etc/security/access.conf respectively.
+  So if you are running 'make test' and get an error 
+  '(Authentication failure)' on test 10 then this might be due to
+  login restrictions of PAM.
+
 
   RedHat 6.1
   ----------
@@ -150,5 +190,5 @@ AUTHOR
 
   Nikolay Pelov <nikip@iname.com>
 
-  Home site: <http://www.cs.kuleuven.ac.be/~pelov/pam/>
+  Web page: <http://www.cs.kuleuven.ac.be/~pelov/pam/>
 

@@ -1,5 +1,15 @@
 Revision history for Perl extension Authen::PAM.
 
+0.13  2002-Feb-25
+	- the test script returns the number of failed tests (except test 10)
+	  so that 'make test' can fail
+	- fixed the code for loading constant symbols on systems with
+	  non-english system locale (thanks to Andrzej Kukula 
+	  <Andrzej.Kukula@navopgd.pl>)
+	- better test for pam_strerror (thanks to Dag-Erling Smorgrav
+	  <des@ofug.org>)
+	- support for OpenPAM (thanks to Dag-Erling Smorgrav <des@ofug.org>)
+
 0.12  2001-Jul-10
 	- some simplifications of the configure script
 	- the format of the conversation messages seems to be different

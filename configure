@@ -860,25 +860,30 @@ LIBS="$ac_save_LIBS"
 fi
 if eval "test \"`echo '$ac_cv_lib_'$ac_lib_var`\" = yes"; then
   echo "$ac_t""yes" 1>&6
-  LIBDL=-ldl
+    ac_tr_lib=HAVE_LIB`echo dl | sed -e 's/[^a-zA-Z0-9_]/_/g' \
+    -e 'y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/'`
+  cat >> confdefs.h <<EOF
+#define $ac_tr_lib 1
+EOF
+
+  LIBS="-ldl $LIBS"
+
 else
   echo "$ac_t""no" 1>&6
 fi
 
-
-echo $LIBDL
 
 LIBS="-lpam"
 
 for ac_func in pam_getenv
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
-echo "configure:877: checking for $ac_func" >&5
+echo "configure:882: checking for $ac_func" >&5
 if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 882 "configure"
+#line 887 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -901,7 +906,7 @@ $ac_func();
 
 ; return 0; }
 EOF
-if { (eval echo configure:905: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:910: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_func_$ac_func=yes"
 else
@@ -926,13 +931,588 @@ fi
 done
 
 
+echo $ac_n "checking if pam_strerror takes a pam_handle_t argument""... $ac_c" 1>&6
+echo "configure:936: checking if pam_strerror takes a pam_handle_t argument" >&5
+if eval "test \"`echo '$''{'ac_cv_pam_strerror_needs_pamh'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 941 "configure"
+#include "confdefs.h"
+#include <security/pam_appl.h>
+int main() {
+pam_handle_t *pamh;
+pam_strerror(pamh, PAM_SUCCESS)
+; return 0; }
+EOF
+if { (eval echo configure:949: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  cat >> confdefs.h <<EOF
+#define PAM_STRERROR_NEEDS_PAMH 1
+EOF
+
+ac_cv_pam_strerror_needs_pamh=yes
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  ac_cv_pam_strerror_needs_pamh=no
+fi
+rm -f conftest*
+fi
+
+echo "$ac_t""$ac_cv_pam_strerror_needs_pamh" 1>&6
+
+
+
+echo $ac_n "checking for PAM_AUTHTOKEN_REQD""... $ac_c" 1>&6
+echo "configure:970: checking for PAM_AUTHTOKEN_REQD" >&5
+if eval "test \"`echo '$''{'ac_cv_have_PAM_AUTHTOKEN_REQD'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 975 "configure"
+#include "confdefs.h"
+#include <security/pam_appl.h>
+int main() {
+int i = PAM_AUTHTOKEN_REQD
+; return 0; }
+EOF
+if { (eval echo configure:982: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  cat >> confdefs.h <<EOF
+#define HAVE_PAM_AUTHTOKEN_REQD 1
+EOF
+ 
+ac_cv_have_PAM_AUTHTOKEN_REQD=yes
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  ac_cv_have_PAM_AUTHTOKEN_REQD=no
+fi
+rm -f conftest*
+fi
+
+echo "$ac_t""$ac_cv_have_PAM_AUTHTOKEN_REQD" 1>&6
+echo $ac_n "checking for PAM_AUTHTOK_EXPIRED""... $ac_c" 1>&6
+echo "configure:1000: checking for PAM_AUTHTOK_EXPIRED" >&5
+if eval "test \"`echo '$''{'ac_cv_have_PAM_AUTHTOK_EXPIRED'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 1005 "configure"
+#include "confdefs.h"
+#include <security/pam_appl.h>
+int main() {
+int i = PAM_AUTHTOK_EXPIRED
+; return 0; }
+EOF
+if { (eval echo configure:1012: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  cat >> confdefs.h <<EOF
+#define HAVE_PAM_AUTHTOK_EXPIRED 1
+EOF
+ 
+ac_cv_have_PAM_AUTHTOK_EXPIRED=yes
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  ac_cv_have_PAM_AUTHTOK_EXPIRED=no
+fi
+rm -f conftest*
+fi
+
+echo "$ac_t""$ac_cv_have_PAM_AUTHTOK_EXPIRED" 1>&6
+echo $ac_n "checking for PAM_AUTHTOK_RECOVER""... $ac_c" 1>&6
+echo "configure:1030: checking for PAM_AUTHTOK_RECOVER" >&5
+if eval "test \"`echo '$''{'ac_cv_have_PAM_AUTHTOK_RECOVER'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 1035 "configure"
+#include "confdefs.h"
+#include <security/pam_appl.h>
+int main() {
+int i = PAM_AUTHTOK_RECOVER
+; return 0; }
+EOF
+if { (eval echo configure:1042: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  cat >> confdefs.h <<EOF
+#define HAVE_PAM_AUTHTOK_RECOVER 1
+EOF
+ 
+ac_cv_have_PAM_AUTHTOK_RECOVER=yes
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  ac_cv_have_PAM_AUTHTOK_RECOVER=no
+fi
+rm -f conftest*
+fi
+
+echo "$ac_t""$ac_cv_have_PAM_AUTHTOK_RECOVER" 1>&6
+echo $ac_n "checking for PAM_AUTHTOK_RECOVERY""... $ac_c" 1>&6
+echo "configure:1060: checking for PAM_AUTHTOK_RECOVERY" >&5
+if eval "test \"`echo '$''{'ac_cv_have_PAM_AUTHTOK_RECOVERY'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 1065 "configure"
+#include "confdefs.h"
+#include <security/pam_appl.h>
+int main() {
+int i = PAM_AUTHTOK_RECOVERY
+; return 0; }
+EOF
+if { (eval echo configure:1072: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  cat >> confdefs.h <<EOF
+#define HAVE_PAM_AUTHTOK_RECOVERY 1
+EOF
+ 
+ac_cv_have_PAM_AUTHTOK_RECOVERY=yes
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  ac_cv_have_PAM_AUTHTOK_RECOVERY=no
+fi
+rm -f conftest*
+fi
+
+echo "$ac_t""$ac_cv_have_PAM_AUTHTOK_RECOVERY" 1>&6
+echo $ac_n "checking for PAM_BAD_ITEM""... $ac_c" 1>&6
+echo "configure:1090: checking for PAM_BAD_ITEM" >&5
+if eval "test \"`echo '$''{'ac_cv_have_PAM_BAD_ITEM'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 1095 "configure"
+#include "confdefs.h"
+#include <security/pam_appl.h>
+int main() {
+int i = PAM_BAD_ITEM
+; return 0; }
+EOF
+if { (eval echo configure:1102: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  cat >> confdefs.h <<EOF
+#define HAVE_PAM_BAD_ITEM 1
+EOF
+ 
+ac_cv_have_PAM_BAD_ITEM=yes
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  ac_cv_have_PAM_BAD_ITEM=no
+fi
+rm -f conftest*
+fi
+
+echo "$ac_t""$ac_cv_have_PAM_BAD_ITEM" 1>&6
+echo $ac_n "checking for PAM_CONV_AGAIN""... $ac_c" 1>&6
+echo "configure:1120: checking for PAM_CONV_AGAIN" >&5
+if eval "test \"`echo '$''{'ac_cv_have_PAM_CONV_AGAIN'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 1125 "configure"
+#include "confdefs.h"
+#include <security/pam_appl.h>
+int main() {
+int i = PAM_CONV_AGAIN
+; return 0; }
+EOF
+if { (eval echo configure:1132: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  cat >> confdefs.h <<EOF
+#define HAVE_PAM_CONV_AGAIN 1
+EOF
+ 
+ac_cv_have_PAM_CONV_AGAIN=yes
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  ac_cv_have_PAM_CONV_AGAIN=no
+fi
+rm -f conftest*
+fi
+
+echo "$ac_t""$ac_cv_have_PAM_CONV_AGAIN" 1>&6
+echo $ac_n "checking for PAM_CRED_DELETE""... $ac_c" 1>&6
+echo "configure:1150: checking for PAM_CRED_DELETE" >&5
+if eval "test \"`echo '$''{'ac_cv_have_PAM_CRED_DELETE'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 1155 "configure"
+#include "confdefs.h"
+#include <security/pam_appl.h>
+int main() {
+int i = PAM_CRED_DELETE
+; return 0; }
+EOF
+if { (eval echo configure:1162: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  cat >> confdefs.h <<EOF
+#define HAVE_PAM_CRED_DELETE 1
+EOF
+ 
+ac_cv_have_PAM_CRED_DELETE=yes
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  ac_cv_have_PAM_CRED_DELETE=no
+fi
+rm -f conftest*
+fi
+
+echo "$ac_t""$ac_cv_have_PAM_CRED_DELETE" 1>&6
+echo $ac_n "checking for PAM_CRED_ESTABLISH""... $ac_c" 1>&6
+echo "configure:1180: checking for PAM_CRED_ESTABLISH" >&5
+if eval "test \"`echo '$''{'ac_cv_have_PAM_CRED_ESTABLISH'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 1185 "configure"
+#include "confdefs.h"
+#include <security/pam_appl.h>
+int main() {
+int i = PAM_CRED_ESTABLISH
+; return 0; }
+EOF
+if { (eval echo configure:1192: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  cat >> confdefs.h <<EOF
+#define HAVE_PAM_CRED_ESTABLISH 1
+EOF
+ 
+ac_cv_have_PAM_CRED_ESTABLISH=yes
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  ac_cv_have_PAM_CRED_ESTABLISH=no
+fi
+rm -f conftest*
+fi
+
+echo "$ac_t""$ac_cv_have_PAM_CRED_ESTABLISH" 1>&6
+echo $ac_n "checking for PAM_CRED_REFRESH""... $ac_c" 1>&6
+echo "configure:1210: checking for PAM_CRED_REFRESH" >&5
+if eval "test \"`echo '$''{'ac_cv_have_PAM_CRED_REFRESH'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 1215 "configure"
+#include "confdefs.h"
+#include <security/pam_appl.h>
+int main() {
+int i = PAM_CRED_REFRESH
+; return 0; }
+EOF
+if { (eval echo configure:1222: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  cat >> confdefs.h <<EOF
+#define HAVE_PAM_CRED_REFRESH 1
+EOF
+ 
+ac_cv_have_PAM_CRED_REFRESH=yes
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  ac_cv_have_PAM_CRED_REFRESH=no
+fi
+rm -f conftest*
+fi
+
+echo "$ac_t""$ac_cv_have_PAM_CRED_REFRESH" 1>&6
+echo $ac_n "checking for PAM_CRED_REINITIALIZE""... $ac_c" 1>&6
+echo "configure:1240: checking for PAM_CRED_REINITIALIZE" >&5
+if eval "test \"`echo '$''{'ac_cv_have_PAM_CRED_REINITIALIZE'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 1245 "configure"
+#include "confdefs.h"
+#include <security/pam_appl.h>
+int main() {
+int i = PAM_CRED_REINITIALIZE
+; return 0; }
+EOF
+if { (eval echo configure:1252: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  cat >> confdefs.h <<EOF
+#define HAVE_PAM_CRED_REINITIALIZE 1
+EOF
+ 
+ac_cv_have_PAM_CRED_REINITIALIZE=yes
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  ac_cv_have_PAM_CRED_REINITIALIZE=no
+fi
+rm -f conftest*
+fi
+
+echo "$ac_t""$ac_cv_have_PAM_CRED_REINITIALIZE" 1>&6
+echo $ac_n "checking for PAM_DELETE_CRED""... $ac_c" 1>&6
+echo "configure:1270: checking for PAM_DELETE_CRED" >&5
+if eval "test \"`echo '$''{'ac_cv_have_PAM_DELETE_CRED'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 1275 "configure"
+#include "confdefs.h"
+#include <security/pam_appl.h>
+int main() {
+int i = PAM_DELETE_CRED
+; return 0; }
+EOF
+if { (eval echo configure:1282: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  cat >> confdefs.h <<EOF
+#define HAVE_PAM_DELETE_CRED 1
+EOF
+ 
+ac_cv_have_PAM_DELETE_CRED=yes
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  ac_cv_have_PAM_DELETE_CRED=no
+fi
+rm -f conftest*
+fi
+
+echo "$ac_t""$ac_cv_have_PAM_DELETE_CRED" 1>&6
+echo $ac_n "checking for PAM_ESTABLISH_CRED""... $ac_c" 1>&6
+echo "configure:1300: checking for PAM_ESTABLISH_CRED" >&5
+if eval "test \"`echo '$''{'ac_cv_have_PAM_ESTABLISH_CRED'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 1305 "configure"
+#include "confdefs.h"
+#include <security/pam_appl.h>
+int main() {
+int i = PAM_ESTABLISH_CRED
+; return 0; }
+EOF
+if { (eval echo configure:1312: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  cat >> confdefs.h <<EOF
+#define HAVE_PAM_ESTABLISH_CRED 1
+EOF
+ 
+ac_cv_have_PAM_ESTABLISH_CRED=yes
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  ac_cv_have_PAM_ESTABLISH_CRED=no
+fi
+rm -f conftest*
+fi
+
+echo "$ac_t""$ac_cv_have_PAM_ESTABLISH_CRED" 1>&6
+echo $ac_n "checking for PAM_INCOMPLETE""... $ac_c" 1>&6
+echo "configure:1330: checking for PAM_INCOMPLETE" >&5
+if eval "test \"`echo '$''{'ac_cv_have_PAM_INCOMPLETE'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 1335 "configure"
+#include "confdefs.h"
+#include <security/pam_appl.h>
+int main() {
+int i = PAM_INCOMPLETE
+; return 0; }
+EOF
+if { (eval echo configure:1342: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  cat >> confdefs.h <<EOF
+#define HAVE_PAM_INCOMPLETE 1
+EOF
+ 
+ac_cv_have_PAM_INCOMPLETE=yes
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  ac_cv_have_PAM_INCOMPLETE=no
+fi
+rm -f conftest*
+fi
+
+echo "$ac_t""$ac_cv_have_PAM_INCOMPLETE" 1>&6
+echo $ac_n "checking for PAM_MODULE_UNKNOWN""... $ac_c" 1>&6
+echo "configure:1360: checking for PAM_MODULE_UNKNOWN" >&5
+if eval "test \"`echo '$''{'ac_cv_have_PAM_MODULE_UNKNOWN'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 1365 "configure"
+#include "confdefs.h"
+#include <security/pam_appl.h>
+int main() {
+int i = PAM_MODULE_UNKNOWN
+; return 0; }
+EOF
+if { (eval echo configure:1372: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  cat >> confdefs.h <<EOF
+#define HAVE_PAM_MODULE_UNKNOWN 1
+EOF
+ 
+ac_cv_have_PAM_MODULE_UNKNOWN=yes
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  ac_cv_have_PAM_MODULE_UNKNOWN=no
+fi
+rm -f conftest*
+fi
+
+echo "$ac_t""$ac_cv_have_PAM_MODULE_UNKNOWN" 1>&6
+echo $ac_n "checking for PAM_NEW_AUTHTOK_REQD""... $ac_c" 1>&6
+echo "configure:1390: checking for PAM_NEW_AUTHTOK_REQD" >&5
+if eval "test \"`echo '$''{'ac_cv_have_PAM_NEW_AUTHTOK_REQD'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 1395 "configure"
+#include "confdefs.h"
+#include <security/pam_appl.h>
+int main() {
+int i = PAM_NEW_AUTHTOK_REQD
+; return 0; }
+EOF
+if { (eval echo configure:1402: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  cat >> confdefs.h <<EOF
+#define HAVE_PAM_NEW_AUTHTOK_REQD 1
+EOF
+ 
+ac_cv_have_PAM_NEW_AUTHTOK_REQD=yes
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  ac_cv_have_PAM_NEW_AUTHTOK_REQD=no
+fi
+rm -f conftest*
+fi
+
+echo "$ac_t""$ac_cv_have_PAM_NEW_AUTHTOK_REQD" 1>&6
+echo $ac_n "checking for PAM_RADIO_TYPE""... $ac_c" 1>&6
+echo "configure:1420: checking for PAM_RADIO_TYPE" >&5
+if eval "test \"`echo '$''{'ac_cv_have_PAM_RADIO_TYPE'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 1425 "configure"
+#include "confdefs.h"
+#include <security/pam_appl.h>
+int main() {
+int i = PAM_RADIO_TYPE
+; return 0; }
+EOF
+if { (eval echo configure:1432: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  cat >> confdefs.h <<EOF
+#define HAVE_PAM_RADIO_TYPE 1
+EOF
+ 
+ac_cv_have_PAM_RADIO_TYPE=yes
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  ac_cv_have_PAM_RADIO_TYPE=no
+fi
+rm -f conftest*
+fi
+
+echo "$ac_t""$ac_cv_have_PAM_RADIO_TYPE" 1>&6
+echo $ac_n "checking for PAM_REFRESH_CRED""... $ac_c" 1>&6
+echo "configure:1450: checking for PAM_REFRESH_CRED" >&5
+if eval "test \"`echo '$''{'ac_cv_have_PAM_REFRESH_CRED'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 1455 "configure"
+#include "confdefs.h"
+#include <security/pam_appl.h>
+int main() {
+int i = PAM_REFRESH_CRED
+; return 0; }
+EOF
+if { (eval echo configure:1462: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  cat >> confdefs.h <<EOF
+#define HAVE_PAM_REFRESH_CRED 1
+EOF
+ 
+ac_cv_have_PAM_REFRESH_CRED=yes
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  ac_cv_have_PAM_REFRESH_CRED=no
+fi
+rm -f conftest*
+fi
+
+echo "$ac_t""$ac_cv_have_PAM_REFRESH_CRED" 1>&6
+echo $ac_n "checking for PAM_REINITIALIZE_CRED""... $ac_c" 1>&6
+echo "configure:1480: checking for PAM_REINITIALIZE_CRED" >&5
+if eval "test \"`echo '$''{'ac_cv_have_PAM_REINITIALIZE_CRED'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 1485 "configure"
+#include "confdefs.h"
+#include <security/pam_appl.h>
+int main() {
+int i = PAM_REINITIALIZE_CRED
+; return 0; }
+EOF
+if { (eval echo configure:1492: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  cat >> confdefs.h <<EOF
+#define HAVE_PAM_REINITIALIZE_CRED 1
+EOF
+ 
+ac_cv_have_PAM_REINITIALIZE_CRED=yes
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  ac_cv_have_PAM_REINITIALIZE_CRED=no
+fi
+rm -f conftest*
+fi
+
+echo "$ac_t""$ac_cv_have_PAM_REINITIALIZE_CRED" 1>&6
+
 echo $ac_n "checking for RTLD_GLOBAL flag""... $ac_c" 1>&6
-echo "configure:931: checking for RTLD_GLOBAL flag" >&5
+echo "configure:1511: checking for RTLD_GLOBAL flag" >&5
 if eval "test \"`echo '$''{'pam_cv_decl_rtld_global'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 936 "configure"
+#line 1516 "configure"
 #include "confdefs.h"
 #include <dlfcn.h>
 #ifdef RTLD_GLOBAL

@@ -8,7 +8,7 @@ perldoc pam_faq
 
 =head1 VERSION
 
-This document is currently at version I<0.01>, as of I<April 21, 2000>
+This document is currently at version I<0.02>, as of I<Oct 5, 2001>
 
 =head1 DESCRIPTION
 
@@ -34,7 +34,7 @@ how to do this:
 
   use Authen::PAM;
 
-  $service = "passwd";
+  $service = "login";
   $username = "foo";
   $password = "bar";
 
@@ -57,7 +57,9 @@ how to do this:
   ref($pamh = new Authen::PAM($service, $username, \&my_conv_func)) ||
 	 die "Error code $pamh during PAM init!";
 
-  $pamh->pam_authenticate;
+  $res = $pamh->pam_authenticate;
+  print $pamh->pam_strerror($res),"\n" unless $res == PAM_SUCCESS();
+
 
 The Authen::PAM module comes with a default conversation function
 which you can find in the file F<PAM.pm>.
@@ -78,8 +80,8 @@ different prompts. Here is an example:
 
   $service = "passwd";
   $username = "foo";
-  $oldpassword = "bar_old";
-  $newpassword = "bar_new";
+  $oldpassword = "old_pass";
+  $newpassword = "new_pass";
 
   sub my_conv_func {
     my @res;
@@ -107,7 +109,25 @@ different prompts. Here is an example:
 	 die "Error code $pamh during PAM init!";
 
   $state = 0;
-  $pamh->pam_chauthtok;
+  $res = $pamh->pam_chauthtok;
+  print $pamh->pam_strerror($res),"\n" unless $res == PAM_SUCCESS();
+
+If you are running the script as root then most likely you will not be
+prompted for an old password. In this case you can simply return the
+new password at the ECHO_OFF prompt. 
+
+The $msg variable contains the text of the input prompt which you can
+use for additional test or for debugging purposes, e.g.
+
+  if ($code == PAM_PROMPT_ECHO_OFF() ) {
+    if ($state>=1 || $msg=~/new/i) { # are we asked for a new password
+       $ans = $newpassword;
+    } else {
+       $ans = $oldpassword;
+    }
+    $state++;
+  }
+
 
 =begin comment
 
@@ -129,7 +149,7 @@ keeps the current state of the conversation.
 
 =head1 SEE ALSO
 
-Authen-PAM
+L<Authen::PAM>
 
 =head1 AUTHOR
 
@@ -137,7 +157,7 @@ Nikolay Pelov nikip@iname.com
 
 =head1 COPYRIGHT
 
-Copyright (c) 1998-2000 Nikolay Pelov. All rights reserved. This file
+Copyright (c) 1998-2001 Nikolay Pelov. All rights reserved. This file
 is part of the Authen::PAM library. This library is free software; you
 can redistribute it and/or modify it under the same terms as Perl
 itself.

@@ -101,7 +101,7 @@ my_conv_func(num_msg, msg, resp, appdata_ptr)
         SV *strSV;
         char *str;
         dSP;
-
+	
         ENTER;
         SAVETMPS;
 
@@ -126,8 +126,8 @@ my_conv_func(num_msg, msg, resp, appdata_ptr)
 	  perl_call_sv(((sPerlPamData*)appdata_ptr)->conv_func, G_ARRAY);
 
         SPAGAIN;
-
-        if (res_cnt & 1 != 0) {
+	
+        if (res_cnt == 2*num_msg + 1) {
 	    res = POPi;
 	    res_cnt--;
 	    if (res_cnt > 0) {
@@ -140,7 +140,6 @@ my_conv_func(num_msg, msg, resp, appdata_ptr)
 		    reply[i].resp = malloc(len+1);
 		    memcpy(reply[i].resp, str, len);
 		    reply[i].resp[len] = 0;
-
 /*
 		printf("Code %d and str %s\n",  reply[i].resp_retcode, 
 						reply[i].resp);
@@ -149,9 +148,9 @@ my_conv_func(num_msg, msg, resp, appdata_ptr)
 	    }
         } 
         else {
-	    croak("The PAM conversation function must return an odd number"
-		  "of values!");
-	    res = PAM_CONV_ERR;
+	  croak("The output list of the PAM conversation function"
+		" must have twice the size of the input list plus one!");
+	  res = PAM_CONV_ERR;
 	}
 
         PUTBACK;
@@ -159,10 +158,7 @@ my_conv_func(num_msg, msg, resp, appdata_ptr)
         FREETMPS;
         LEAVE;
 
-        if (reply != NULL) {
-            *resp = reply;
-        }
-
+	*resp = reply;
 	return res;
 }
 
@@ -236,9 +232,9 @@ int arg;
 	  return PAM_MAXTRIES;
       else if (strcmp(name, "NEW_AUTHTOK_REQD") == 0 ||
 	       strcmp(name, "AUTHTOKEN_REQD") == 0)
-      #if defined(PAM_NEW_AUTHTOK_REQD)
+      #if defined(HAVE_PAM_NEW_AUTHTOK_REQD)
 	  return PAM_NEW_AUTHTOK_REQD;
-      #elif defined(PAM_AUTHTOKEN_REQD)
+      #elif defined(HAVE_PAM_AUTHTOKEN_REQD)
           return PAM_AUTHTOKEN_REQD;       /* Old Linux-PAM */
       #else
 	  goto not_there;
@@ -261,9 +257,9 @@ int arg;
 	  return PAM_AUTHTOK_ERR;
       else if (strcmp(name, "AUTHTOK_RECOVER_ERR") == 0 ||
 	       strcmp(name, "AUTHTOK_RECOVERY_ERR") == 0)
-      #if defined(PAM_AUTHTOK_RECOVER_ERR)    /* Linux-PAM   */
+      #if defined(HAVE_PAM_AUTHTOK_RECOVER_ERR)    /* Linux-PAM   */
 	  return PAM_AUTHTOK_RECOVER_ERR;
-      #elif defined(PAM_AUTHTOK_RECOVERY_ERR) /* Solaris PAM */
+      #elif defined(HAVE_PAM_AUTHTOK_RECOVERY_ERR) /* Solaris PAM */
 	  return PAM_AUTHTOK_RECOVERY_ERR;
       #else
 	  goto not_there;
@@ -279,19 +275,19 @@ int arg;
       else if (strcmp(name, "ABORT") == 0)
 	  return PAM_ABORT;
       else if (strcmp(name, "AUTHTOK_EXPIRED") == 0)
-      #if defined(PAM_AUTHTOK_EXPIRED)
+      #if defined(HAVE_PAM_AUTHTOK_EXPIRED)
 	  return PAM_AUTHTOK_EXPIRED;
       #else
 	  goto not_there;
       #endif
       else if (strcmp(name, "MODULE_UNKNOWN") == 0)
-      #if defined(PAM_MODULE_UNKNOWN)  /* Linux-PAM only */
+      #if defined(HAVE_PAM_MODULE_UNKNOWN)  /* Linux-PAM only */
 	  return PAM_MODULE_UNKNOWN;
       #else
 	  goto not_there;
       #endif
       else if (strcmp(name, "BAD_ITEM") == 0)
-      #if defined(PAM_BAD_ITEM)
+      #if defined(HAVE_PAM_BAD_ITEM)
 	  return PAM_BAD_ITEM;
       #else
 	  goto not_there;
@@ -299,13 +295,13 @@ int arg;
 
       /* New Linux-PAM return codes */
       else if (strcmp(name, "CONV_AGAIN") == 0)
-      #if defined(PAM_CONV_AGAIN)
+      #if defined(HAVE_PAM_CONV_AGAIN)
 	  return PAM_CONV_AGAIN;
       #else
 	  goto not_there;
       #endif
       else if (strcmp(name, "INCOMPLETE") == 0)
-      #if defined(PAM_INCOMPLETE)
+      #if defined(HAVE_PAM_INCOMPLETE)
 	  return PAM_INCOMPLETE;
       #else
 	  goto not_there;
@@ -334,7 +330,7 @@ int arg;
       else if (strcmp(name, "USER_PROMPT") == 0)
 	  return PAM_USER_PROMPT;
       else if (strcmp(name, "FAIL_DELAY") == 0)
-      #if defined(PAM_FAIL_DELAY)
+      #if defined(HAVE_PAM_FAIL_DELAY)
 	  return PAM_FAIL_DELAY;
       #else
 	  goto not_there;
@@ -349,36 +345,36 @@ int arg;
       /* pam_set_cred flags */
       else if (strcmp(name, "ESTABLISH_CRED") == 0 ||
 	       strcmp(name, "CRED_ESTABLISH") == 0)
-      #if defined(PAM_ESTABLISH_CRED)
+      #if defined(HAVE_PAM_ESTABLISH_CRED)
 	  return PAM_ESTABLISH_CRED;
-      #elif defined(PAM_CRED_ESTABLISH)   /* Old Linux-PAM */
+      #elif defined(HAVE_PAM_CRED_ESTABLISH)   /* Old Linux-PAM */
 	  return PAM_CRED_ESTABLISH;
       #else
 	  goto not_there;
       #endif
       else if (strcmp(name, "DELETE_CRED") == 0 ||
 	       strcmp(name, "CRED_DELETE") == 0)
-      #if defined(PAM_DELETE_CRED)
+      #if defined(HAVE_PAM_DELETE_CRED)
 	  return PAM_DELETE_CRED;
-      #elif defined(PAM_CRED_DELETE)       /* Old Linux-PAM */
+      #elif defined(HAVE_PAM_CRED_DELETE)       /* Old Linux-PAM */
 	  return PAM_CRED_DELETE;
       #else
 	  goto not_there;
       #endif
       else if (strcmp(name, "REINITIALIZE_CRED") == 0 ||
 	       strcmp(name, "CRED_REINITIALIZE") == 0)
-      #if defined(PAM_REINITIALIZE_CRED)
+      #if defined(HAVE_PAM_REINITIALIZE_CRED)
 	  return PAM_REINITIALIZE_CRED;
-      #elif defined(PAM_CRED_REINITIALIZE)
+      #elif defined(HAVE_PAM_CRED_REINITIALIZE)
 	  return PAM_CRED_REINITIALIZE;    /* Old Linux-PAM */
       #else
 	  goto not_there;
       #endif
       else if (strcmp(name, "REFRESH_CRED") == 0 ||
 	       strcmp(name, "CRED_REFRESH") == 0)
-      #if defined(PAM_REFRESH_CRED)
+      #if defined(HAVE_PAM_REFRESH_CRED)
 	  return PAM_REFRESH_CRED;
-      #elif defined(PAM_CRED_REFRESH)
+      #elif defined(HAVE_PAM_CRED_REFRESH)
 	  return PAM_CRED_REFRESH;         /* Old Linux-PAM */
       #else
 	  goto not_there;
@@ -397,11 +393,19 @@ int arg;
       else if (strcmp(name, "TEXT_INFO") == 0)
 	  return PAM_TEXT_INFO;
       else if (strcmp(name, "RADIO_TYPE") == 0)
-      #if defined(PAM_RADIO_TYPE)
+      #if defined(HAVE_PAM_RADIO_TYPE)
 	  return PAM_RADIO_TYPE;
       #else
 	  goto not_there;
       #endif
+
+      /* I'm not sure if these are really needed... */
+      /*
+      else if (strcmp(name, "MAX_MSG_SIZE") == 0)
+	  return PAM_MAX_MSG_SIZE;
+      else if (strcmp(name, "MAX_RESP_SIZE") == 0)
+	  return PAM_MAX_RESP_SIZE;
+      */
     } 
     else if (strncmp(name, "HAVE_PAM_", 9) == 0) {
       name = &name[9];
@@ -432,7 +436,7 @@ int arg;
     return 0;
 
 not_there:
-    errno = ENOENT;
+    errno = ENOSYS;
     return 0;
 }
 
@@ -498,7 +502,7 @@ pam_set_item(pamh, item_type, item)
 	      sv_setsv(data->conv_func, item);
 	      RETVAL = PAM_SUCCESS;
 	  }
-#if defined(PAM_FAIL_DELAY)
+#if defined(HAVE_PAM_FAIL_DELAY)
           else if (item_type == PAM_FAIL_DELAY) {
 	      data = get_perl_pam_data(pamh);
 	      sv_setsv(data->delay_func, item);
@@ -532,7 +536,7 @@ pam_get_item(pamh, item_type, item)
 	      sv_setsv(item, data->conv_func);
 	      RETVAL = PAM_SUCCESS;
 	  }
-#if defined(PAM_FAIL_DELAY)
+#if defined(HAVE_PAM_FAIL_DELAY)
           else if (item_type == PAM_FAIL_DELAY) {
 	      data = get_perl_pam_data(pamh);
 	      sv_setsv(item, data->delay_func);
@@ -552,7 +556,7 @@ pam_strerror(pamh, errnum)
 	pam_handle_t *	pamh
 	int	errnum
 	CODE:
-#if defined(PAM_NEW_AUTHTOK_REQD)
+#if defined(PAM_STRERROR_NEEDS_PAMH)
 	  RETVAL = pam_strerror(pamh, errnum);
 #else
 	  RETVAL = pam_strerror(errnum);
