@@ -1,5 +1,9 @@
 Revision history for Perl extension Authen::PAM.
 
+0.08  1999-Sep-13
+	- fixed a bug when returning empty strings from the conversation 
+	  function (thanks to Eric Einhorn <outcast@shell.monmouth.com>))
+
 0.07  1999-Jun-08
 	- the test script now gets the user name from the real user id
 	- restored back the file Makefile.PL and modified the configuration 

@@ -111,7 +111,7 @@ conv_func(num_msg, msg, resp, appdata_ptr)
 
         if (res_cnt & 1 != 0) {
 	    res = POPi;
-	    res_cnt --;
+	    res_cnt--;
 	    if (res_cnt > 0) {
 		res_cnt /= 2;
         	reply = malloc( res_cnt * sizeof(struct pam_response));
@@ -119,13 +119,10 @@ conv_func(num_msg, msg, resp, appdata_ptr)
         	    strSV = POPs;
         	    str = SvPV(strSV, len);
         	    reply[i].resp_retcode = POPi;
-        	    if (len == 0)
-        		reply[i].resp = NULL;
-        	    else {
-        		reply[i].resp = malloc(len+1);
-    			memcpy(reply[i].resp, str, len);
-  			reply[i].resp[len] = 0;
-	            }
+		    reply[i].resp = malloc(len+1);
+		    memcpy(reply[i].resp, str, len);
+		    reply[i].resp[len] = 0;
+
 /*
 		printf("Code %d and str %s\n",  reply[i].resp_retcode, 
 						reply[i].resp);

@@ -32,6 +32,8 @@ qq!$TARG: Makefile
 \techo '\$\$VERSION = "\$(VERSION)";' >>$TARG
 \techo '#This is to make sure require will return an error' >>$TARG
 \techo '0;' >>$TARG
+\techo '__END__' >>$TARG
+\techo '' >>$TARG
 \tperl -ne 'print if /^=\\w/ ... /^=cut/' PAM.pm.in >>$TARG
 
 !
