@@ -1,6 +1,6 @@
 #This is a dummy file so CPAN will find a VERSION
 package Authen::PAM;
-$VERSION = "0.11";
+$VERSION = "0.12";
 #This is to make sure require will return an error
 0;
 __END__

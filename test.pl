@@ -114,9 +114,14 @@ sub my_fail_delay {
 #  }
 
   print
-"---- Now you will be prompted to enter your unix password. On some systems
+"---- Now you will be prompted to enter your unix password.";
+  if ($login_name eq "root") {
+    print "\n";
+  } else {
+    print " On some systems
 ---- this test will succeed only if you are running as 'root'.
-";
+"
+  }
 
   $res = pam_authenticate($pamh, 0);
   pam_ok(10, $pamh, $res);

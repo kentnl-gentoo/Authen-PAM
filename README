@@ -1,9 +1,9 @@
 
 				Authen::PAM 
 
-				Version 0.11
+				Version 0.12
 
-				2000-Dec-06
+				2001-Jul-10
 
 
 	Copyright (c) 1998-2000 Nikolay Pelov. All rights reserved.
@@ -45,7 +45,7 @@ using the following sequence of commands:
 
 By default the module is build using the compiler and options used to build
 the perl executable itself. If you want to change the C compiler then set
-the CC environment varible, for exmple like this:
+the CC environment variable, for example like this:
 
     CC=gcc perl Makefile.PL
 
@@ -56,7 +56,7 @@ should edit by hand the generated Makefile.
 If you have any problems in building and installing the module then you
 should first check on the home page of the Authen::PAM module at address
 http://www.cs.kuleuven.ac.be/~pelov/pam/ for the latest development version
-(if any) which could possibly fix your problems. If none is avaliable or the
+(if any) which could possibly fix your problems. If none is available or the
 problems remain then you can write me a mail which includes the following
 information:
   * the version of your unix - `uname -a'
@@ -69,13 +69,22 @@ information:
   * the output of the `perl Makefile.PL', `make' and `make test'
   * any relevant messages produced by the syslogd daemon -
     usually found in `/var/log/messages'
-  * if the problem is in another program which uses the Authen::PAM module then
+  * if the problem is in a perl script which uses the Authen::PAM module then
     the source of this program (even if it is a slight modification of some
     of the source code provided with this module)
 
 
 KNOWN PROBLEMS
 ==============
+
+  Most of the current configurations of the 'login' service include a
+  module 'pam_securetty' or 'pam_access' which restrict the login of 
+  some users depending on the tty or the host name they are logging from.
+  The configuration files of these two modules are /etc/securetty and
+  /etc/security/access.conf respectively.
+  So if you are running 'make test', especially as a root, and get an error 
+  '(Authentication failure)' on test 10 then this very well might be
+  the problem.
 
   RedHat 6.1
   ----------
@@ -128,7 +137,7 @@ KNOWN PROBLEMS
      PAM.c:NNN: invalid format `#line' directive.
 
   This is caused by a bug in the perl xsubpp compiler.
-  The simpliest way to solve this problem is to open the file PAM.c,
+  The simplest way to solve this problem is to open the file PAM.c,
   delete the line with the error and run make again.
 
   The other solution is to patch your xsubpp compiler. Go to your perl

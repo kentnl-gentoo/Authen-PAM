@@ -10,6 +10,5 @@ typemap
 xsubpp-1.9504.patch
 configure
 configure.in
-aclocal.m4
 pam.cfg.in
 d/PAM.pm

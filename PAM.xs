@@ -16,7 +16,7 @@ extern "C" {
    | If your PAM library has the pam_get/putenv functions (PAM versions 
    | after 0.54) the following macro should be defined.
    |
-   #define HAVE_PAM_ENV_FUNCTIONS
+   #define HAVE_PAM_GETENV
 
    | The following macro activates a workaround for a bug in the solaris 2.6
    | PAM library by setting a pointer to the perl conversation function
@@ -107,8 +107,13 @@ my_conv_func(num_msg, msg, resp, appdata_ptr)
 
         PUSHMARK(sp);
         for (i = 0; i < num_msg; i++) {
+	#ifdef sun
             XPUSHs(sv_2mortal(newSViv((*msg)[i].msg_style)));
             XPUSHs(sv_2mortal(newSVpv((*msg)[i].msg, 0)));
+	#else
+            XPUSHs(sv_2mortal(newSViv((msg[i])->msg_style)));
+            XPUSHs(sv_2mortal(newSVpv((msg[i])->msg, 0)));
+	#endif
         }
         PUTBACK;
 
@@ -279,6 +284,12 @@ int arg;
       #else
 	  goto not_there;
       #endif
+      else if (strcmp(name, "MODULE_UNKNOWN") == 0)
+      #if defined(PAM_MODULE_UNKNOWN)  /* Linux-PAM only */
+	  return PAM_MODULE_UNKNOWN;
+      #else
+	  goto not_there;
+      #endif
       else if (strcmp(name, "BAD_ITEM") == 0)
       #if defined(PAM_BAD_ITEM)
 	  return PAM_BAD_ITEM;
@@ -402,7 +413,7 @@ int arg;
 	  return 0;
       #endif
       else if (strcmp(name, "ENV_FUNCTIONS") == 0)
-      #if defined(HAVE_PAM_ENV_FUNCTIONS)
+      #if defined(HAVE_PAM_GETENV)
 	  return 1;
       #else
 	  return 0;
@@ -549,7 +560,7 @@ pam_strerror(pamh, errnum)
 	OUTPUT:
 	RETVAL
 
-#if defined(HAVE_PAM_ENV_FUNCTIONS)
+#if defined(HAVE_PAM_GETENV)
 int
 pam_putenv(pamh, name_value)
 	pam_handle_t	*pamh
