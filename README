@@ -1,12 +1,12 @@
 
 				Authen::PAM 
 
-				Version 0.13
+				Version 0.14
 
-				2002-Feb-25
+				2003-Jan-22
 
 
-	Copyright (c) 1998-2002 Nikolay Pelov. All rights reserved.
+	Copyright (c) 1998-2003 Nikolay Pelov. All rights reserved.
 	This program is free software; you can redistribute it and/or
 	modify it under the same terms as Perl itself.
 
@@ -32,6 +32,8 @@ things installed on your system:
     - Solaris 2.6
     - FreeBSD 3.1
     - OpenPAM <http://openpam.sourceforge.net/>
+    - HP-UX 11.0
+    - Darwin 6.0 and Mac OS X 10.2
 
 
 BUILDING AND INSTALLING THE MODULE
@@ -86,7 +88,7 @@ KNOWN PROBLEMS
   If you get an error like
 	PAM.xs:11: security/pam_appl.h: No such file or directory
   this means that either you don't have the PAM library installed on
-  your system or that only the header files are missing. If your
+  your system or at least the PAM header files are missing. If your
   distribution provides the PAM library as packages then you should
   check that you have also installed the pam-dev or pam-devel package.
 
@@ -98,10 +100,9 @@ KNOWN PROBLEMS
   I've tracked down the problem to the dynamic loader of FreeBSD not
   exporting some symbols in dlopen()'d modules. I've submitted a bug 
   report - http://www.freebsd.org/cgi/query-pr.cgi?pr=25059
-  On the above URL there are also instructions on how to reproduce the
-  problem.  Unless this is being fixed then it is very likely that the
-  Authen::PAM module will not be able to work there. 
-  Lobby the BSD developers.
+  It seems that this bug has been fixed already and starting
+  from the next release of FreeBSD (probably 4.6) the module should
+  work again.
 
 
   Solaris 2.8
@@ -188,7 +189,7 @@ KNOWN PROBLEMS
 AUTHOR
 ======
 
-  Nikolay Pelov <nikip@iname.com>
+  Nikolay Pelov <pelov@cs.kuleuven.ac.be>
 
   Web page: <http://www.cs.kuleuven.ac.be/~pelov/pam/>
 

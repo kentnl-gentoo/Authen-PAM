@@ -57,6 +57,7 @@ how to do this:
   ref($pamh = new Authen::PAM($service, $username, \&my_conv_func)) ||
 	 die "Error code $pamh during PAM init!";
 
+  $res = $pamh->pam_set_item(PAM_TTY(), $tty_name);
   $res = $pamh->pam_authenticate;
   print $pamh->pam_strerror($res),"\n" unless $res == PAM_SUCCESS();
 
@@ -153,7 +154,7 @@ L<Authen::PAM>
 
 =head1 AUTHOR
 
-Nikolay Pelov nikip@iname.com
+Nikolay Pelov pelov@cs.kuleuven.ac.be
 
 =head1 COPYRIGHT
 

@@ -1,6 +1,6 @@
 #This is a dummy file so CPAN will find a VERSION
 package Authen::PAM;
-$VERSION = "0.13";
+$VERSION = "0.14";
 #This is to make sure require will return an error
 0;
 __END__
@@ -170,7 +170,7 @@ PAM Application developer's Manual
 
 =head1 AUTHOR
 
-Nikolay Pelov nikip@iname.com
+Nikolay Pelov pelov@cs.kuleuven.ac.be
 
 =head1 COPYRIGHT
 

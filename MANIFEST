@@ -9,6 +9,7 @@ test.pl
 typemap
 xsubpp-1.9504.patch
 configure
-configure.in
+configure.ac
+PAM_config.h.in
 pam.cfg.in
 d/PAM.pm

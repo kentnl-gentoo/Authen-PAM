@@ -8,7 +8,15 @@ extern "C" {
 }
 #endif
 
-#include <security/pam_appl.h>
+#include <PAM_config.h>
+
+#if defined( HAVE_SECURITY_PAM_APPL_H )
+# include <security/pam_appl.h>
+#else
+# if defined( HAVE_PAM_PAM_APPL_H )
+#   include <pam/pam_appl.h>
+# endif
+#endif
 
 /* 
    Description of the macros used by this file.
@@ -29,7 +37,7 @@ extern "C" {
 /* this is now determined from configure script */
 
 
-#ifdef sun
+#if defined( sun ) || defined( __hpux )
 
   #define CONST_VOID	void
   #define CONST_STRUCT	struct

@@ -2,9 +2,11 @@ use ExtUtils::MakeMaker;
 use Config;
 
 sub configure {
-    $ENV{'CC'} or $ENV{'CC'} = $Config{'cc'};
+    $ENV{'CC'} # If a compiler is not specified on the command line then
+      or $ENV{'CC'} = $Config{'cc'}; # use the one with which perl was built
 
-    system "./configure";
+    system("./configure") == 0 or
+      die "Error in configuring the Authen::PAM module.\n";
 
     # returns a reference to anonymous hash which is then interpreted as
     # additional options to the WriteMakeFile
@@ -16,8 +18,10 @@ sub configure {
     }
 
     foreach (@ARGV) {
-      print "Adding a definition '$_' from the command line\n";
-      ${$options}{'DEFINE'} .= " $_ " if /-D.+/;
+      if (/^-D.+/) {
+	print "Adding a definition '$_' from the command line\n";
+	$options->{DEFINE} .= " $_ " ;
+      }
     }
 
     return $options;
@@ -41,8 +45,9 @@ qq!$TARG: Makefile
 
 WriteMakefile(
     'NAME'	=> 'Authen::PAM',
-    'VERSION_FROM' => 'PAM.pm.in',
+    'VERSION_FROM' => 'PAM.pm',
     'LIBS'	=> ['-lpam'],
+    'INC'       => '-I.',          # Needed for PAM_config.h
     'CONFIGURE' => \&configure,
     'PREREQ_PM' => { POSIX => 0 }, # module dependenices
     'dist'      => {
