@@ -1,5 +1,14 @@
 Revision history for Perl extension Authen::PAM.
 
+0.09  2000-Feb-03
+	- fixed a bug in PAM.xs when more then one messages are given
+	  to the conversation function (thanks to Oleg Bulavsky 
+	  <bulch@sibnet.ru>)
+	- small changes to the test script
+	- several old constant symbols are exported only on request;
+	  also created two tags :constants and :functions for easier
+ 	  exporting only some of the symbols
+
 0.08  1999-Sep-13
 	- fixed a bug when returning empty strings from the conversation 
 	  function (thanks to Eric Einhorn <outcast@shell.monmouth.com>))

@@ -1,9 +1,9 @@
 
 				Authen::PAM 
 
-				Version 0.08
+				Version 0.09
 
-				1999-Sep-13
+				2000-Feb-03
 
 
 	Copyright (c) 1998,1999 Nikolay Pelov. All rights reserved.
@@ -54,7 +54,7 @@ information:
   * the version of the perl - `perl -V'
   * if you are on linux:
     - the name and version of the distribution you are using
-    - the the version of the pam - `ls /lib/libpam*' or `ls /usr/lib/libpam*'
+    - the version of the pam - `ls /lib/libpam*' or `ls /usr/lib/libpam*'
   * the description of the "login" service from your pam configuration -
     usually found in `/etc/pam.conf' file or in the file `/etc/pam.d/login'
   * the output of the `perl Makefile.PL', `make' and `make test'
@@ -83,7 +83,7 @@ KNOWN PROBLEMS
   The name and the version of your OS is determined by looking at the
   variables 'osname' and 'osvers' from the perl 'Config' module and if they 
   match 'solaris' and '2.6' then the workaround is activated. 
-  To see the values of this variables you can use `perl -V:osname -V:osvers'.
+  To see the values of these variables you can use `perl -V:osname -V:osvers'.
 
   If you are building this module on a different version of Solaris (e.g 2.7)
   and you are planning to use it on Solaris 2.6 or if you are working on

@@ -10,7 +10,7 @@ BEGIN { $| = 1; print "1..1\n"; }
 END {print "not ok 1\n" unless $loaded;}
 
 use POSIX;
-use Authen::PAM;
+use Authen::PAM; # qw(:functions :constants);
 $loaded = 1;
 print "ok 1\n";
 
@@ -28,7 +28,7 @@ sub ok {
 
 sub pam_ok {
     my ($no, $pamh, $pam_ret_val, $other_test) = @_ ;
-    if ($pam_ret_val != PAM_SUCCESS) {
+    if ($pam_ret_val != &PAM_SUCCESS) {
         print "not ok $no (", pam_strerror($pamh, $pam_ret_val),")\n";
     }
     elsif (defined($other_test) && !$other_test) {
@@ -44,12 +44,12 @@ sub skip {
   print "skipped $no: $msg\n";
 }
 
-# $\ = "\n";
+
   $res = -1;
 
   $pam_service = "login";
   $login_name = getpwuid($<);
-  $tty_name = ttyname(STDIN);
+  $tty_name = ttyname(fileno(STDIN));
 
   if (!$login_name) {
     print "Can't obtain your login name!\n";
@@ -65,22 +65,22 @@ sub skip {
   $res = pam_start($pam_service, $login_name, $pamh);
   pam_ok(2, $pamh, $res);
 
-  $res = pam_get_item($pamh, PAM_SERVICE, $item);
+  $res = pam_get_item($pamh, &PAM_SERVICE, $item);
   pam_ok(3, $pamh, $res, $item eq $pam_service);
 
-  $res = pam_get_item($pamh, PAM_USER, $item);
+  $res = pam_get_item($pamh, &PAM_USER, $item);
   pam_ok(4, $pamh, $res, $item eq $login_name);
 
-  $res = pam_get_item($pamh, PAM_CONV, $item);
+  $res = pam_get_item($pamh, &PAM_CONV, $item);
   pam_ok(5, $pamh, $res, $item == \&Authen::PAM::pam_default_conv);
 
-  $res = pam_set_item($pamh, PAM_TTY, $tty_name);
+  $res = pam_set_item($pamh, &PAM_TTY, $tty_name);
   pam_ok(6, $pamh, $res);
 
-  $res = pam_get_item($pamh, PAM_TTY, $item);
+  $res = pam_get_item($pamh, &PAM_TTY, $item);
   pam_ok(7, $pamh, $res, $item eq $tty_name);
 
-  if (HAVE_PAM_ENV_FUNCTIONS) {
+  if (&HAVE_PAM_ENV_FUNCTIONS) {
     $res = pam_putenv($pamh, "_ALPHA=alpha");
     pam_ok(8, $pamh, $res);
 
@@ -104,16 +104,17 @@ sub skip {
   pam_ok(10, $pamh, $res);
 
   $res = pam_end($pamh, 0);
-  ok(11, $res == PAM_SUCCESS);
+  ok(11, $res == &PAM_SUCCESS);
 
   # Checking the OO interface
   $pamh = new Authen::PAM($pam_service, $login_name);
   ok(12, ref($pamh));
 
+#  $res = $pamh->pam_authenticate;
 #  $res = $pamh->pam_chauthtok;
 #  pam_ok(111, $pamh, $res);
 
-  $pamh = 0;
+  $pamh = 0;  # this will destroy the object (and call pam_end)
 
   print "\n";
 

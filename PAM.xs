@@ -95,8 +95,8 @@ conv_func(num_msg, msg, resp, appdata_ptr)
 
         PUSHMARK(sp);
         for (i = 0; i < num_msg; i++) {
-            XPUSHs(sv_2mortal(newSViv(msg[i]->msg_style)));
-            XPUSHs(sv_2mortal(newSVpv(msg[i]->msg, 0)));
+            XPUSHs(sv_2mortal(newSViv((*msg)[i].msg_style)));
+            XPUSHs(sv_2mortal(newSVpv((*msg)[i].msg, 0)));
         }
         PUTBACK;
 
@@ -187,7 +187,7 @@ int arg;
       #if defined(PAM_NEW_AUTHTOK_REQD)
 	  return PAM_NEW_AUTHTOK_REQD;
       #elif defined(PAM_AUTHTOKEN_REQD)
-	  return PAM_AUTHTOKEN_REQD;
+          return PAM_AUTHTOKEN_REQD;       /* Old Linux-PAM */
       #else
 	  goto not_there;
       #endif
@@ -209,9 +209,9 @@ int arg;
 	  return PAM_AUTHTOK_ERR;
       else if (strcmp(name, "AUTHTOK_RECOVER_ERR") == 0 ||
 	       strcmp(name, "AUTHTOK_RECOVERY_ERR") == 0)
-      #if defined(PAM_AUTHTOK_RECOVER_ERR)
+      #if defined(PAM_AUTHTOK_RECOVER_ERR)    /* Linux-PAM   */
 	  return PAM_AUTHTOK_RECOVER_ERR;
-      #elif defined(PAM_AUTHTOK_RECOVERY_ERR)
+      #elif defined(PAM_AUTHTOK_RECOVERY_ERR) /* Solaris PAM */
 	  return PAM_AUTHTOK_RECOVERY_ERR;
       #else
 	  goto not_there;
@@ -279,7 +279,7 @@ int arg;
 	       strcmp(name, "CRED_ESTABLISH") == 0)
       #if defined(PAM_ESTABLISH_CRED)
 	  return PAM_ESTABLISH_CRED;
-      #elif defined(PAM_CRED_ESTABLISH)
+      #elif defined(PAM_CRED_ESTABLISH)   /* Old Linux-PAM */
 	  return PAM_CRED_ESTABLISH;
       #else
 	  goto not_there;
@@ -288,7 +288,7 @@ int arg;
 	       strcmp(name, "CRED_DELETE") == 0)
       #if defined(PAM_DELETE_CRED)
 	  return PAM_DELETE_CRED;
-      #elif defined(PAM_CRED_DELETE)
+      #elif defined(PAM_CRED_DELETE)       /* Old Linux-PAM */
 	  return PAM_CRED_DELETE;
       #else
 	  goto not_there;
@@ -298,7 +298,7 @@ int arg;
       #if defined(PAM_REINITIALIZE_CRED)
 	  return PAM_REINITIALIZE_CRED;
       #elif defined(PAM_CRED_REINITIALIZE)
-	  return PAM_CRED_REINITIALIZE;
+	  return PAM_CRED_REINITIALIZE;    /* Old Linux-PAM */
       #else
 	  goto not_there;
       #endif
@@ -307,7 +307,7 @@ int arg;
       #if defined(PAM_REFRESH_CRED)
 	  return PAM_REFRESH_CRED;
       #elif defined(PAM_CRED_REFRESH)
-	  return PAM_CRED_REFRESH;
+	  return PAM_CRED_REFRESH;         /* Old Linux-PAM */
       #else
 	  goto not_there;
       #endif

@@ -1,6 +1,6 @@
 #This is a dummy file so CPAN will find a VERSION
 package Authen::PAM;
-$VERSION = "0.08";
+$VERSION = "0.09";
 #This is to make sure require will return an error
 0;
 __END__
@@ -29,13 +29,13 @@ Authen::PAM - Perl interface to PAM library
   $retval = pam_set_item($pamh, $item_type, $item);
   $retval = pam_get_item($pamh, $item_type, $item);
 
-  if (HAVE_PAM_ENV_FUNCTIONS) {
+  if (&HAVE_PAM_ENV_FUNCTIONS) {
       $retval = pam_putenv($pamh, $name_value);
       $val = pam_getenv($pamh, $name);
       %env = pam_getenvlist($pamh);
   }
 
-  if (HAVE_PAM_FAIL_DELAY) {
+  if (&HAVE_PAM_FAIL_DELAY) {
       $retval = pam_fail_delay($pamh, $musec_delay);
   }
 
@@ -51,7 +51,7 @@ function is used (Authen::PAM::pam_default_conv).
 
 The $flags argument is optional for all functions which use it
 except for pam_setcred. The $pam_status argument is also optional for
-pam_end function. Both of this arguments will be set to 0 if not given.
+pam_end function. Both of these arguments will be set to 0 if not given.
 
 The names of some constants from the PAM library have changed over the
 time. You can use any of the known names for a given constant although
@@ -71,6 +71,8 @@ pam_getenvlist).
 
 If you prefer to use an object oriented style for accessing the PAM
 library here is the interface:
+
+  use Authen::PAM qw(:constants);
 
   $pamh = new Authen::PAM($service_name, $user);
   $pamh = new Authen::PAM($service_name, $user, $conv_func);
@@ -120,13 +122,13 @@ or the same thing but using OO style:
 =head2 Conversation function format
 
 When starting the PAM the user must supply a conversation function.
-It is used for interaction between the PAM modules and the user.
-The argument of the function is a list of pairs ($msg_type, $msg)
-and it must return a list with the same number of pairs ($resp_retcode, $resp)
-with replies to the input messages. For now the $resp_retcode is not used
-and must be always set to 0.  In addition the user must append to
-the end of the resulting list the return code of the conversation function
-(usually PAM_SUCCESS).
+It is used for interaction between the PAM modules and the user. The
+argument of the function is a list of pairs ($msg_type, $msg) and it
+must return a list with the same number of pairs ($resp_retcode,
+$resp) with replies to the input messages. For now the $resp_retcode
+is not used and must be always set to 0. In addition the user must
+append to the end of the resulting list the return code of the
+conversation function (usually PAM_SUCCESS).
 
 Here is a sample form of the PAM conversation function:
 
@@ -143,7 +145,7 @@ sub pam_conv_func {
         push @res, 0;
         push @res, $ans;
     }
-    push @res, PAM_SUCCESS;
+    push @res, &PAM_SUCCESS;
     return @res;
 }
 
@@ -152,6 +154,13 @@ sub pam_conv_func {
 
 This module was tested with the following versions of the Linux-PAM library:
 0.50, 0.56, 0.59 and 0.65.
+
+The following constant names: PAM_AUTHTOKEN_REQD, PAM_CRED_ESTABLISH,
+PAM_CRED_DELETE, PAM_CRED_REINITIALIZE, PAM_CRED_REFRESH are used by
+some older version of the Linux-PAM library and are not exported by
+default. If you really want them, then load the module with
+
+use Authen::PAM qw(:DEFAULT :old);
 
 This module still does not support some of the new Linux-PAM
 functions such as pam_system_log.
