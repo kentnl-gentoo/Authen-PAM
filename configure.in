@@ -1,0 +1,23 @@
+AC_INIT
+
+PERL_PROG_CHECK
+PERL_DEF(CC,cc)
+PERL_DEF(CPP,cpprun)
+AC_PROG_CC
+AC_PROG_CPP
+
+dnl
+dnl This variable is only used in the tests and is not passed to the Makefile
+dnl
+LIBS="-lpam"
+
+dnl
+dnl Add -ldl to LIBS if necessary for linking the other test scripts
+dnl
+PAM_LIB_DL	
+PAM_FUNC_ENV
+PAM_DECL_RTLD_GLOBAL
+
+AC_OUTPUT(Makefile.PL PAM.pm)
+
+$PERL Makefile.PL

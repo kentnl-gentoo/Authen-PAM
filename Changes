@@ -1,21 +1,40 @@
 Revision history for Perl extension Authen::PAM.
 
-0.01  May 18 1998
-	- original version; created by h2xs 1.18
+0.06  1999-May-19
+	- the test script now passes to pam the current tty which is needed
+	  by some authentication modules (e.g. pam_securetty)
+	- some of the test programs in configure need to be linked with -ldl
+	  under Linux
+	- the default converstation function now uses termios functions to
+	  turn off the echo (thanks to Charlie Brady <charlieb@aurema.com>)
 
-0.02  Jun 09 1998
+0.05  1999-Mar-23
+	- the package is now configured with a `configure' script
+	- the module can now be used with FreeBSD 3.1 PAM library
+	  (thanks to Adrian Pavlykevych <pam@polynet.lviv.ua>)
+	- removed the PAM_AUTHTOK and PAM_OLDAUTHTOK constants because they
+	  can be used only by modules
+	- the test script now returns the pam error code for tests which fail
+
+0.04  1998-Oct-30
+	- in the previous version the HAVE_PAM_ENV_FUNCTIONS was incorrectly 
+	  commented by default
+	- added a workaround for a bug in the solaris 2.6 pam library
+	  (tanks to Dawn Whiteside <dwhitesi@tiercel.uwaterloo.ca>)
+	- the distribution now includes the xsubpp patch
+	- added a call to the pam_authenticate function to the test program
+
+0.03  1998-Oct-06
+	- added support for earliest versions of Linux-PAM without env 
+	  functions (those before version 0.54)
+	- fixed some compiler warnings
+
+0.02  1998-Jun-09
 	- the module is now compatible with Solaris 2.6 PAM library
+	  (thanks to Lupe Christoph <lupe@lupe-christoph.de>)
 	- added object oriented interface
 	- added default value for $flags argument in most of the functions
 
-0.03  Oct 06 1998
-	- fixed some compiler warnings
-	- added support for earliest versions of Linux-PAM without env 
-	  functions (those before version 0.54)
+0.01  1998-May-18
+	- original version; created by h2xs 1.18
 
-0.04  Oct 30 1998
-	- in the previous version the HAVE_PAM_ENV_FUNCTIONS was incorrectly 
-	  commented by default.
-	- added a workaround for a bug in the solaris pam library
-	- the distribution now includes the xsubpp patch
-	- added a call to the pam_authenticate function to the test program

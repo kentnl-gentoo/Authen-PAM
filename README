@@ -1,89 +1,107 @@
 
 				Authen::PAM 
 
-				Version 0.04
+				Version 0.06
 
-				Oct 30 1998
+				1999-May-19
 
 
-	Copyright (c) 1998 Nikolay Pelov. All rights reserved.
+	Copyright (c) 1998,1999 Nikolay Pelov. All rights reserved.
 	This program is free software; you can redistribute it and/or
 	modify it under the same terms as Perl itself.
 
 
 DESCRIPTION
------------
+===========
 
 This module provides a Perl interface to the PAM library.
 
 
 PREREQUISITES
--------------
+=============
 
 Before you can build Authen::PAM you need to have the following
-thing installed on your system:
+things installed on your system:
 
-    * Perl, version 5
-    * PAM library (either Linux-PAM or Solaris PAM library)
+  * Perl, at least version 5.003_23
+  * This module is known to work with the following implementations of 
+    the PAM library:
+    - Linux-PAM
+    - Solaris 2.6
+    - FreeBSD 3.1
 
-  The Linux-PAM home page is http://www.kernel.org/pub/linux/libs/pam
+  The Linux-PAM home page is http://www.kernel.org/pub/linux/libs/pam/
 
 
 BUILDING AND INSTALLING THE MODULE
-----------------------------------
+==================================
 
-Assuming you have met all the prerequisites, building the module should
-be relatively straightforward.
+Assuming you have met all the prerequisites, you can built the module 
+using the following sequence of commands:
 
-First if you are using a version of the PAM older then 0.54 (without the
-functions for manipulating the environment) you must edit the file PAM.xs 
-and comment the line defining PAM_HAVE_ENV_FUNCTIONS. (If you know an 
-automatic way to determine this situation I will be glad to hear it.)
-
-Then the module can now be built using this sequence of commands:
-
-    perl Makefile.PL
+    ./configure
     make
     make test
     make install
 
-If you have problems in the first step the you probably don't have a PAM 
-library installed on your system.
+If the name of your perl executable is different than `perl' and/or
+it is not located in your $PATH then use the following:
 
-The 'make' command can fail if there is some incompatibility between the 
-version of PAM which you are using and the current implementation of this
-module. In this case please write me a mail with the problems you see,
-the versions of PAM, Perl, Linux, glibc which you are using and eventualy
-all header files found in your /usr/include/security directory and I will
-try to fix it.
+    PERL=/path_to_perl/perl_name ./configure
+
+
+If you have any problems in building and installing the module then you
+should first check on the home page of the Authen::PAM module at address
+http://www.cs.kuleuven.ac.be/~pelov/pam/ for the latest development version
+(if any) which could possibly fix your problems. If none is avaliable or the
+problems remain then you can write me a mail which includes the following
+information:
+  * the version of your unix `uname -a'
+  * the version of the perl `perl -V'
+  * if you are on linux:
+    - which distribution you are using
+    - the the version of the pam `ls /lib/libpam*' or `ls /usr/lib/libpam*'
+  * the description of the "login" service from your pam configuration
+    usually found in `/etc/pam.conf' file or in the file `/etc/pam.d/login'
+  * the output of the `./configure', `make' and `make test'
 
 
 KNOWN PROBLEMS
---------------
+==============
 
-If you are using RedHat 5.0 distribution then you should upgrade your 
-glibc package because it has a bug in the dlopen function. I tested it
-with version 2.0.7-6 and it works ok.
+  Buggy glibc2
+  ------------
+
+  Some of the first versions of the glibc2 libraries have a bug in the
+  dlopen function which will prevent this module from working. If you are 
+  using an original RedHat 5.0 distribution then you probably have this 
+  problem. 
+  I know that the bug is fixed in at least version 2.0.7-6 of the glibc2 
+  library. 
 
 
-If you are using perl, version 5.004_03 then you will probably see the
-following error during the compilation of PAM.xs file to PAM.c:
+  Perl version 5.004_03
+  ---------------------
 
-   PAM.c:NNN: invalid format `#line' directive.
+  If you are using perl, version 5.004_03 then you will probably see the
+  following error during the compilation of PAM.xs file to PAM.c:
 
-This is caused by a bug in the xsubpp compiler.
-The simpliest way to solve this problem is to open the file PAM.c,
-delete the line with the error and run make again.
+     PAM.c:NNN: invalid format `#line' directive.
 
-The other solution is to patch your xsubpp compiler. Go to your perl
-directory (usually /usr/lib/perl5 or /usr/local/lib/perl5) and apply the
-patch xsubpp-1.9504.patch.
+  This is caused by a bug in the perl xsubpp compiler.
+  The simpliest way to solve this problem is to open the file PAM.c,
+  delete the line with the error and run make again.
+
+  The other solution is to patch your xsubpp compiler. Go to your perl
+  directory (usually /usr/lib/perl5 or /usr/local/lib/perl5) and apply the
+  patch xsubpp-1.9504.patch.
 
 
 AUTHOR
-------
+======
 
   Nikolay Pelov <nikip@iname.com>
 
   The original distribution site of this module is 
-  http://www.cs.kuleuven.ac.be/~pelov/pam
+  http://www.cs.kuleuven.ac.be/~pelov/pam/
+

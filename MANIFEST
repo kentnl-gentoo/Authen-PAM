@@ -1,9 +1,13 @@
 Changes
 MANIFEST
 README
-Makefile.PL
-PAM.pm
+Makefile.PL.in
+PAM.pm.in
 PAM.xs
 test.pl
 typemap
 xsubpp-1.9504.patch
+configure
+configure.in
+aclocal.m4
+

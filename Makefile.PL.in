@@ -1,0 +1,12 @@
+use ExtUtils::MakeMaker;
+# See lib/ExtUtils/MakeMaker.pm for details of how to influence
+# the contents of the Makefile that is written.
+WriteMakefile(
+    'NAME'	=> 'Authen::PAM',
+    'VERSION_FROM' => 'PAM.pm',
+    'LIBS'	=> ['-lpam'],
+    'DEFINE'	=> '@DEFS@',
+    'INC'	=> '', # e.g., '-I/usr/include/other'
+    'dist'      => {COMPRESS=>'gzip', SUFFIX=>'gz'},
+    'realclean' => {FILES=>"config.* Makefile.PL PAM.pm"}
+);

@@ -16,7 +16,9 @@ extern "C" {
    Please tell me if you know some automatic way to determine this.
 */
 
-#define HAVE_PAM_ENV_FUNCTIONS
+
+/* this is now determined from configure script */
+/* #define HAVE_PAM_ENV_FUNCTIONS */
 
 
 #ifdef sun
@@ -246,10 +248,12 @@ int arg;
     else if (strcmp(name, "PAM_CONV") == 0)
         return PAM_CONV;
     /* module flags */
+/*
     else if (strcmp(name, "PAM_AUTHTOK") == 0)
         return PAM_CONV;
     else if (strcmp(name, "PAM_OLDAUTHTOK") == 0)
         return PAM_CONV;
+*/
 
     else if (strcmp(name, "PAM_RUSER") == 0)
 	return PAM_RUSER;
