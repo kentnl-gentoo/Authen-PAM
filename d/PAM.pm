@@ -1,6 +1,6 @@
 #This is a dummy file so CPAN will find a VERSION
 package Authen::PAM;
-$VERSION = "0.09";
+$VERSION = "0.10";
 #This is to make sure require will return an error
 0;
 __END__
@@ -29,13 +29,13 @@ Authen::PAM - Perl interface to PAM library
   $retval = pam_set_item($pamh, $item_type, $item);
   $retval = pam_get_item($pamh, $item_type, $item);
 
-  if (&HAVE_PAM_ENV_FUNCTIONS) {
+  if (HAVE_PAM_ENV_FUNCTIONS) {
       $retval = pam_putenv($pamh, $name_value);
       $val = pam_getenv($pamh, $name);
       %env = pam_getenvlist($pamh);
   }
 
-  if (&HAVE_PAM_FAIL_DELAY) {
+  if (HAVE_PAM_FAIL_DELAY) {
       $retval = pam_fail_delay($pamh, $musec_delay);
   }
 
@@ -76,6 +76,8 @@ library here is the interface:
 
   $pamh = new Authen::PAM($service_name, $user);
   $pamh = new Authen::PAM($service_name, $user, $conv_func);
+
+  ref($pamh) || die "Error code $pamh during PAM init!";
 
   $retval = $pamh->pam_authenticate($flags);
   $retval = $pamh->pam_setcred($flags);
@@ -132,22 +134,22 @@ conversation function (usually PAM_SUCCESS).
 
 Here is a sample form of the PAM conversation function:
 
-sub pam_conv_func {
-    my @res;
-    while ( @_ ) {
-        my $msg_type = shift;
-        my $msg = shift;
+  sub pam_conv_func {
+      my @res;
+      while ( @_ ) {
+          my $msg_type = shift;
+          my $msg = shift;
 
-        print $msg;
+          print $msg;
 
-	# switch ($msg_type) { obtain value for $ans; }
+	 # switch ($msg_type) { obtain value for $ans; }
 
-        push @res, 0;
-        push @res, $ans;
-    }
-    push @res, &PAM_SUCCESS;
-    return @res;
-}
+         push @res, 0;
+         push @res, $ans;
+      }
+      push @res, PAM_SUCCESS;
+      return @res;
+  }
 
 
 =head1 COMPATIBILITY
@@ -160,7 +162,7 @@ PAM_CRED_DELETE, PAM_CRED_REINITIALIZE, PAM_CRED_REFRESH are used by
 some older version of the Linux-PAM library and are not exported by
 default. If you really want them, then load the module with
 
-use Authen::PAM qw(:DEFAULT :old);
+  use Authen::PAM qw(:DEFAULT :old);
 
 This module still does not support some of the new Linux-PAM
 functions such as pam_system_log.
@@ -171,6 +173,12 @@ PAM Application developer's Manual
 
 =head1 AUTHOR
 
-Nikolay Pelov <nikip@iname.com>
+Nikolay Pelov nikip@iname.com
+
+=head1 COPYRIGHT
+
+Copyright (c) 1998-2000 Nikolay Pelov. All rights reserved. This
+program is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
 
 =cut

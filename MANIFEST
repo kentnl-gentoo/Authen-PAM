@@ -1,6 +1,7 @@
 Changes
 MANIFEST
 README
+FAQ.pod
 Makefile.PL
 PAM.pm.in
 PAM.xs

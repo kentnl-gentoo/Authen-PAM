@@ -36,7 +36,7 @@ require DynaLoader;
 	PAM_NEW_AUTHTOK_REQD PAM_ACCT_EXPIRED PAM_AUTHTOK_ERR
 	PAM_AUTHTOK_RECOVER_ERR PAM_AUTHTOK_RECOVERY_ERR
 	PAM_AUTHTOK_LOCK_BUSY PAM_AUTHTOK_DISABLE_AGING PAM_TRY_AGAIN
-	PAM_ABORT
+	PAM_ABORT PAM_CONV_AGAIN PAM_INCOMPLETE
 
 	PAM_SERVICE PAM_USER PAM_TTY PAM_RHOST PAM_CONV PAM_RUSER
 	PAM_USER_PROMPT
@@ -64,7 +64,7 @@ Exporter::export_ok_tags('old');
 # we will not export them.
 # PAM_AUTHTOK PAM_OLDAUTHTOK
 
-$VERSION = '0.09';
+$VERSION = '0.10';
 
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()
@@ -110,7 +110,7 @@ sub new {
     my $class = ref($this) || $this;
     my $pamh;
     my $retval = pam_start (@_, $pamh);
-    return $retval if $retval != &PAM_SUCCESS;
+    return $retval if $retval != PAM_SUCCESS();
     bless $pamh, $class;
     return $pamh;
 }
@@ -130,28 +130,28 @@ sub pam_default_conv {
         my $msg = shift;
         my $ans = "";
 
-        print $msg unless $code == &PAM_ERROR_MSG;
+        print $msg unless $code == PAM_ERROR_MSG();
 
-        if ($code == &PAM_PROMPT_ECHO_OFF ) {
+        if ($code == PAM_PROMPT_ECHO_OFF() ) {
 	    my $termios = POSIX::Termios->new;
 	    $termios->getattr(1);
             my $c_lflag = $termios->getlflag;
-            $termios->setlflag($c_lflag & ~&POSIX::ECHO );
-            $termios->setattr(1, &POSIX::TCSANOW) ;
+            $termios->setlflag($c_lflag & ~POSIX::ECHO );
+            $termios->setattr(1, POSIX::TCSANOW) ;
 
             chomp( $ans = <STDIN> ); print "\n";
 
 	    $termios->setlflag($c_lflag);
-	    $termios->setattr(1, &POSIX::TCSANOW );
+	    $termios->setattr(1, POSIX::TCSANOW );
         }
-        elsif ($code == &PAM_PROMPT_ECHO_ON ) { chomp( $ans = <STDIN> ); }
-        elsif ($code == &PAM_ERROR_MSG )      { print STDERR "$msg\n"; }
-        elsif ($code == &PAM_TEXT_INFO )      { print "\n"; }
+        elsif ($code == PAM_PROMPT_ECHO_ON() ) { chomp( $ans = <STDIN> ); }
+        elsif ($code == PAM_ERROR_MSG() )      { print STDERR "$msg\n"; }
+        elsif ($code == PAM_TEXT_INFO() )      { print "\n"; }
 
-        push @res, &PAM_SUCCESS;
+        push @res, PAM_SUCCESS();
         push @res, $ans;
     }
-    push @res, &PAM_SUCCESS;
+    push @res, PAM_SUCCESS();
     return @res;
 }
 
@@ -191,13 +191,13 @@ Authen::PAM - Perl interface to PAM library
   $retval = pam_set_item($pamh, $item_type, $item);
   $retval = pam_get_item($pamh, $item_type, $item);
 
-  if (&HAVE_PAM_ENV_FUNCTIONS) {
+  if (HAVE_PAM_ENV_FUNCTIONS) {
       $retval = pam_putenv($pamh, $name_value);
       $val = pam_getenv($pamh, $name);
       %env = pam_getenvlist($pamh);
   }
 
-  if (&HAVE_PAM_FAIL_DELAY) {
+  if (HAVE_PAM_FAIL_DELAY) {
       $retval = pam_fail_delay($pamh, $musec_delay);
   }
 
@@ -238,6 +238,8 @@ library here is the interface:
 
   $pamh = new Authen::PAM($service_name, $user);
   $pamh = new Authen::PAM($service_name, $user, $conv_func);
+
+  ref($pamh) || die "Error code $pamh during PAM init!";
 
   $retval = $pamh->pam_authenticate($flags);
   $retval = $pamh->pam_setcred($flags);
@@ -294,22 +296,22 @@ conversation function (usually PAM_SUCCESS).
 
 Here is a sample form of the PAM conversation function:
 
-sub pam_conv_func {
-    my @res;
-    while ( @_ ) {
-        my $msg_type = shift;
-        my $msg = shift;
+  sub pam_conv_func {
+      my @res;
+      while ( @_ ) {
+          my $msg_type = shift;
+          my $msg = shift;
 
-        print $msg;
+          print $msg;
 
-	# switch ($msg_type) { obtain value for $ans; }
+	 # switch ($msg_type) { obtain value for $ans; }
 
-        push @res, 0;
-        push @res, $ans;
-    }
-    push @res, &PAM_SUCCESS;
-    return @res;
-}
+         push @res, 0;
+         push @res, $ans;
+      }
+      push @res, PAM_SUCCESS;
+      return @res;
+  }
 
 
 =head1 COMPATIBILITY
@@ -322,7 +324,7 @@ PAM_CRED_DELETE, PAM_CRED_REINITIALIZE, PAM_CRED_REFRESH are used by
 some older version of the Linux-PAM library and are not exported by
 default. If you really want them, then load the module with
 
-use Authen::PAM qw(:DEFAULT :old);
+  use Authen::PAM qw(:DEFAULT :old);
 
 This module still does not support some of the new Linux-PAM
 functions such as pam_system_log.
@@ -333,6 +335,12 @@ PAM Application developer's Manual
 
 =head1 AUTHOR
 
-Nikolay Pelov <nikip@iname.com>
+Nikolay Pelov nikip@iname.com
+
+=head1 COPYRIGHT
+
+Copyright (c) 1998-2000 Nikolay Pelov. All rights reserved. This
+program is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
 
 =cut

@@ -11,7 +11,7 @@ if test $pam_cv_lib_dl = yes; then
 fi])
 
 dnl-----------------------------------
-dnl PAM_ENV_FUNC
+dnl PAM_FUNC_ENV
 dnl
 AC_DEFUN(PAM_FUNC_ENV,
 [AC_CACHE_CHECK(for environment handling functions, pam_cv_func_env,

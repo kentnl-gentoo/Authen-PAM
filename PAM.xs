@@ -239,6 +239,20 @@ int arg;
 	  goto not_there;
       #endif
 
+      /* New Linux-PAM return codes */
+      else if (strcmp(name, "CONV_AGAIN") == 0)
+      #if defined(PAM_CONV_AGAIN)
+	  return PAM_CONV_AGAIN;
+      #else
+	  goto not_there;
+      #endif
+      else if (strcmp(name, "INCOMPLETE") == 0)
+      #if defined(PAM_INCOMPLETE)
+	  return PAM_INCOMPLETE;
+      #else
+	  goto not_there;
+      #endif
+
       /* set/get_item constants */
       else if (strcmp(name, "SERVICE") == 0)
 	  return PAM_SERVICE;
@@ -369,7 +383,7 @@ not_there:
  *
  *     void (*fail_delay)(int status, unsigned int delay);
  *
- * by a call to pam_set_item with type PAM_FAIL_DELAY
+ * by a call to pam_set_item(pamh, PAM_FAIL_DELAY, fail_delay);
  */
 void
 my_fail_delay(status, delay)

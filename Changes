@@ -1,5 +1,12 @@
 Revision history for Perl extension Authen::PAM.
 
+0.10  2000-May-02
+	- fixed some small problems with the constructor 'new'
+	  (thanks to <wil@langford.net>)
+	- added a FAQ file
+	- added PAM_CONV_AGAIN and PAM_INCOMPLETE constants from the
+	  new versions of the Linux PAM library
+
 0.09  2000-Feb-03
 	- fixed a bug in PAM.xs when more then one messages are given
 	  to the conversation function (thanks to Oleg Bulavsky 

@@ -1,12 +1,12 @@
 
 				Authen::PAM 
 
-				Version 0.09
+				Version 0.10
 
-				2000-Feb-03
+				2000-May-02
 
 
-	Copyright (c) 1998,1999 Nikolay Pelov. All rights reserved.
+	Copyright (c) 1998-2000 Nikolay Pelov. All rights reserved.
 	This program is free software; you can redistribute it and/or
 	modify it under the same terms as Perl itself.
 
@@ -15,6 +15,8 @@ DESCRIPTION
 ===========
 
 This module provides a Perl interface to the PAM library.
+
+Home site: <http://www.cs.kuleuven.ac.be/~pelov/pam/>
 
 
 PREREQUISITES
@@ -26,12 +28,9 @@ things installed on your system:
   * Perl, at least version 5.003_23
   * This module is known to work with the following or newer 
     implementations of the PAM library:
-    - Linux-PAM
+    - Linux-PAM  <http://www.kernel.org/pub/linux/libs/pam/>
     - Solaris 2.6
     - FreeBSD 3.1
-
-  The Linux-PAM home page is http://www.kernel.org/pub/linux/libs/pam/
-
 
 BUILDING AND INSTALLING THE MODULE
 ==================================
@@ -60,6 +59,9 @@ information:
   * the output of the `perl Makefile.PL', `make' and `make test'
   * any relevant messages produced by the syslogd daemon -
     usually found in `/var/log/messages'
+  * if the problem is in another program which uses the Authen::PAM module then
+    the source of this program (even if it is a slight modification of some
+    of the source code provided with this module)
 
 
 KNOWN PROBLEMS
@@ -67,7 +69,6 @@ KNOWN PROBLEMS
 
   Buggy glibc2
   ------------
-
   Some of the first versions of the glibc2 libraries have a bug in the
   dlopen function which will prevent this module from working. If you are
   using an original RedHat 5.0 distribution then you probably have this
@@ -75,9 +76,9 @@ KNOWN PROBLEMS
   I know that the bug is fixed in at least version 2.0.7-6 of the glibc2
   library.
 
+
   Bug in the Solaris 2.6 PAM library
   ----------------------------------
-
   There is a known bug in the Solaris 2.6 PAM library for which I have
   implemented a workaround. This bug is fixed in Solaris 2.7.
   The name and the version of your OS is determined by looking at the
@@ -96,7 +97,6 @@ KNOWN PROBLEMS
 
   Perl version 5.004_03
   ---------------------
-
   If you are using perl, version 5.004_03 then you will probably see the
   following error during the compilation of PAM.xs file to PAM.c:
 
@@ -116,6 +116,5 @@ AUTHOR
 
   Nikolay Pelov <nikip@iname.com>
 
-  The original distribution site of this module is 
-  http://www.cs.kuleuven.ac.be/~pelov/pam/
+  Home site: <http://www.cs.kuleuven.ac.be/~pelov/pam/>
 
