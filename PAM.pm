@@ -45,7 +45,7 @@ require DynaLoader;
 	HAVE_PAM_FAIL_DELAY HAVE_PAM_ENV_FUNCTIONS
 );
 
-$VERSION = '0.03';
+$VERSION = '0.04';
 
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()
@@ -186,7 +186,7 @@ function is used (Authen::PAM::pam_default_conv).
 
 The $flags argument is optional for all functions which use it
 except for pam_setcred. The $pam_status argument is also optional for
-pam_end function.
+pam_end function. Both of this arguments will be set to 0 if not given.
 
 The names of some constants from the PAM library have changed over the
 time. You can use any of the known names for a given constant although
@@ -205,7 +205,7 @@ pam_getenvlist).
 =head2 Object Oriented Style
 
 If you prefer to use an object oriented style for accessing the PAM
-library you can use the following interface:
+library here is the interface:
 
   $pamh = new Authen::PAM($service_name, $user);
   $pamh = new Authen::PAM($service_name, $user, $conv_func);
@@ -286,21 +286,22 @@ sub pam_conv_func {
 =head1 COMPATIBILITY
 
 This module was tested with the following versions of the Linux-PAM library:
-0.65, 0.59, 0.56 and 0.50.
+0.50, 0.56, 0.59 and 0.65.
 
 This module still does not support some of the new Linux-PAM 
-functions such as pam_system_log. This will be added in the near future
-if necessary.
-
-Lupe Christoph <lupe@alanya.m.isar.de> ported this module to work
-with Solaris 2.6 PAM library.
-
-=head1 AUTHOR
-
-Nikolay Pelov <nikip@iname.com>
+functions such as pam_system_log. 
 
 =head1 SEE ALSO
 
 PAM Application developer's Manual
+
+=head1 ACKNOWLEDGEMENTS
+
+Lupe Christoph <lupe@alanya.m.isar.de> helped me to port this module for
+Solaris 2.6 PAM library.
+
+=head1 AUTHOR
+
+Nikolay Pelov <nikip@iname.com>
 
 =cut

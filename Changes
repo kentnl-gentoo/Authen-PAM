@@ -12,3 +12,10 @@ Revision history for Perl extension Authen::PAM.
 	- fixed some compiler warnings
 	- added support for earliest versions of Linux-PAM without env 
 	  functions (those before version 0.54)
+
+0.04  Oct 30 1998
+	- in the previous version the HAVE_PAM_ENV_FUNCTIONS was incorrectly 
+	  commented by default.
+	- added a workaround for a bug in the solaris pam library
+	- the distribution now includes the xsubpp patch
+	- added a call to the pam_authenticate function to the test program

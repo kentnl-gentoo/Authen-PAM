@@ -16,28 +16,71 @@ extern "C" {
    Please tell me if you know some automatic way to determine this.
 */
 
-/* #define HAVE_PAM_ENV_FUNCTIONS */
+#define HAVE_PAM_ENV_FUNCTIONS
 
 
 #ifdef sun
-/* The Solaris 2.6 and the Linux header file differ here. */
-#define PAM_GET_ITEM_ARG3_TYPE	void **
+
+  /* The Solaris 2.6 and the Linux header file differ here. */
+  #define CONST_VOID	void
+  #define CONST_STRUCT	struct
+
+  #define STATIC_CONV_FUNC
+
 #else
-#define PAM_GET_ITEM_ARG3_TYPE	const void **
+
+  #define CONST_STRUCT	const struct
+  #define CONST_VOID	const void
+
 #endif
+
+
+#ifdef STATIC_CONV_FUNC
+
+    static SV *perl_conv_func = NULL;
+
+    #define SET_CONV_FUNC set_conv_func(pamh)
+
+    void set_conv_func(pamh)
+	pam_handle_t *pamh;
+    {
+	struct pam_conv *cs;
+	int res;
+	res = pam_get_item(pamh, PAM_CONV, (CONST_VOID **)&cs);
+	if (res == PAM_SUCCESS && cs != NULL && cs->appdata_ptr != NULL)
+	    perl_conv_func = cs->appdata_ptr;
+	else
+	    croak("Error in setting conversation function");
+    }
+
+#else
+
+    #define SET_CONV_FUNC
+
+#endif
+
+
+static int
+not_here(s)
+char *s;
+{
+    croak("%s not implemented on this architecture", s);
+    return -1;
+}
+
 
 static int
 conv_func(num_msg, msg, resp, appdata_ptr)
         int num_msg;
-        const struct pam_message **msg;
+        CONST_STRUCT pam_message **msg;
         struct pam_response **resp;
         void *appdata_ptr;
 {
         int i,res_cnt,res;
 	STRLEN len;
-        struct pam_response* reply = NULL;
-        SV * strSV;
-        char * str;
+        struct pam_response *reply = NULL;
+        SV *strSV;
+        char *str;
         dSP;
 
         ENTER;
@@ -50,6 +93,11 @@ conv_func(num_msg, msg, resp, appdata_ptr)
         }
         PUTBACK;
 
+#ifdef STATIC_CONV_FUNC
+	if (perl_conv_func == NULL)
+	    croak("Error in calling conversation function!");
+	appdata_ptr = perl_conv_func;
+#endif
         res_cnt = perl_call_sv(appdata_ptr, G_ARRAY);
 
         SPAGAIN;
@@ -94,43 +142,6 @@ conv_func(num_msg, msg, resp, appdata_ptr)
         }
 
 	return res;
-}
-
-void set_conv_func(conv, func)
-	struct pam_conv *	conv;
-	SV *	func;
-{
-    if (conv == 0 || func == 0)
-	croak("Error in setting conv function");
-
-    conv->conv = conv_func;
-    if (conv->appdata_ptr == 0) {
-        conv->appdata_ptr = newSVsv(func);
-    }
-    else {
-        sv_setsv(conv->appdata_ptr, func);
-    }
-}
-
-void free_conv_func(conv)
-	struct pam_conv *       conv;
-{
-    if (conv == 0)
-	croak("Error in freeing conv function");
-
-    if (conv->appdata_ptr != 0) {
-	SvREFCNT_dec((SV*)conv->appdata_ptr); 
-	conv->appdata_ptr = 0;
-    }
-}
-
-
-static int
-not_here(s)
-char *s;
-{
-    croak("%s not implemented on this architecture", s);
-    return -1;
 }
 
 static double
@@ -346,24 +357,24 @@ PROTOTYPES: ENABLE
 
 double
 constant(name,arg)
-	char *		name
-	int		arg
+	char	*name
+	int	arg
 
 
 int
 pam_set_item(pamh, item_type, item)
-	pam_handle_t *	pamh
+	pam_handle_t *pamh
 	int	item_type
-	char *	item
+	char	*item
 	PREINIT:
 	  struct pam_conv *conv_st;
 	  int res;
 	CODE:
 	  if (item_type == PAM_CONV) {
 	    res = pam_get_item( pamh, PAM_CONV, 
-				(PAM_GET_ITEM_ARG3_TYPE)&conv_st);
+				(CONST_VOID **)&conv_st);
 	    if (res == PAM_SUCCESS) {
-	        set_conv_func(conv_st, item);
+		sv_setsv(conv_st->appdata_ptr, (SV*)item);
 	        RETVAL = pam_set_item( pamh, PAM_CONV, conv_st);
 	    } 
 	    else
@@ -376,24 +387,24 @@ pam_set_item(pamh, item_type, item)
 	
 int
 pam_get_item(pamh, item_type, item)
-	pam_handle_t * 	pamh
+	pam_handle_t *pamh
 	int	item_type
-	SV *	item
+	SV	*item
 	PREINIT:
-	  char * c;
-	  struct pam_conv * conv_st;
+	  char *c;
+	  struct pam_conv *conv_st;
 	  int res;
 	CODE:
 	  if (item_type == PAM_CONV) {
 	      res = pam_get_item( pamh, PAM_CONV, 
-					(PAM_GET_ITEM_ARG3_TYPE)&conv_st);
+					(CONST_VOID **)&conv_st);
 	      if (res == PAM_SUCCESS) 
 	          sv_setsv(item, conv_st->appdata_ptr);
 	      RETVAL = res;
 	  }
 	  else {
 	      RETVAL = pam_get_item( pamh, item_type, 
-					(PAM_GET_ITEM_ARG3_TYPE)&c);
+					(CONST_VOID **)&c);
 	      sv_setpv(item, c);
 	  }
 	OUTPUT:
@@ -416,8 +427,8 @@ pam_strerror(pamh, errnum)
 #if defined(HAVE_PAM_ENV_FUNCTIONS)
 int
 pam_putenv(pamh, name_value)
-	pam_handle_t * pamh
-	const char *	name_value
+	pam_handle_t	*pamh
+	const char	*name_value
 	CODE:
 	  RETVAL = pam_putenv(pamh, name_value);
 	OUTPUT:
@@ -425,8 +436,8 @@ pam_putenv(pamh, name_value)
 
 const char *
 pam_getenv(pamh, name)
-	pam_handle_t *	pamh
-	const char *	name
+	pam_handle_t	*pamh
+	const char	*name
 	CODE:
 	  RETVAL = pam_getenv(pamh, name);
 	OUTPUT:
@@ -434,9 +445,9 @@ pam_getenv(pamh, name)
 
 void
 _pam_getenvlist(pamh)
-	pam_handle_t *	pamh
+	pam_handle_t *pamh
 	PREINIT:
-	  char ** res;
+	  char **res;
 	  int i;
 	  int c;
 	PPCODE:
@@ -452,22 +463,22 @@ _pam_getenvlist(pamh)
 
 int
 pam_putenv(pamh, name_value)
-	pam_handle_t * pamh
-	const char *	name_value
+	pam_handle_t	*pamh
+	const char	*name_value
 	CODE:
 	  not_here("pam_putenv");
 
 const char *
 pam_getenv(pamh, name)
-	pam_handle_t *	pamh
-	const char *	name
+	pam_handle_t	*pamh
+	const char	*name
 	CODE:
 	  not_here("pam_getenv");
 
 
 void
 _pam_getenvlist(pamh)
-	pam_handle_t *	pamh
+	pam_handle_t *pamh
 	CODE:
 	  not_here("pam_getenvlist");
 
@@ -500,15 +511,16 @@ pam_fail_delay(pamh, musec_delay)
 
 int
 _pam_start(service_name, user, func, pamh)
-	const char *	service_name
-	const char *	user
-	SV *	func
-	pam_handle_t *	pamh = NO_INIT
+	const char *service_name
+	const char *user
+	SV *func
+	pam_handle_t *pamh = NO_INIT
 	PREINIT:
 	  struct pam_conv conv_st;
 	CODE:
-	  conv_st.appdata_ptr = 0;
-	  set_conv_func(&conv_st, func);
+	  conv_st.conv = conv_func;
+	  conv_st.appdata_ptr = newSVsv(func);
+
 	  RETVAL = pam_start(service_name, user, &conv_st, &pamh);
 OUTPUT:
 	pamh
@@ -516,16 +528,24 @@ OUTPUT:
 
 int
 pam_end(pamh, pam_status=PAM_SUCCESS)
-	pam_handle_t *	pamh
+	pam_handle_t *pamh
 	int	pam_status
 	PREINIT:
 	  struct pam_conv *conv_st;
 	  int res;
 	CODE:
-	  res = pam_get_item( pamh, PAM_CONV, 
-				(PAM_GET_ITEM_ARG3_TYPE)&conv_st);
+	  res = pam_get_item(pamh, PAM_CONV, 
+				(CONST_VOID **)&conv_st);
 	  if (res == PAM_SUCCESS) {
-	      free_conv_func(conv_st);
+
+	      if (conv_st == 0)
+		  croak("Error in freeing conv function");
+
+	      if (conv_st->appdata_ptr != 0) {
+		SvREFCNT_dec((SV*)conv_st->appdata_ptr); 
+		conv_st->appdata_ptr = 0;
+	      }
+
 	      RETVAL = pam_end(pamh, pam_status);
 	  }
 	  else
@@ -535,54 +555,60 @@ pam_end(pamh, pam_status=PAM_SUCCESS)
 
 int
 pam_authenticate(pamh, flags=0)
-	pam_handle_t *	pamh
+	pam_handle_t *pamh
 	int	flags
 	CODE:
+	  SET_CONV_FUNC;
 	  RETVAL = pam_authenticate(pamh,flags);
 	OUTPUT:
 	RETVAL
 
 int
 pam_setcred(pamh, flags)
-	pam_handle_t *	pamh
+	pam_handle_t *pamh
 	int	flags
 	CODE:
+	  SET_CONV_FUNC;
 	  RETVAL = pam_setcred(pamh,flags);
 	OUTPUT:
 	RETVAL
 
 int
 pam_acct_mgmt(pamh, flags=0)
-	pam_handle_t *	pamh
+	pam_handle_t *pamh
 	int	flags
 	CODE:
+	  SET_CONV_FUNC;
 	  RETVAL = pam_acct_mgmt(pamh,flags);
 	OUTPUT:
 	RETVAL
 
 int
 pam_open_session(pamh, flags=0)
-	pam_handle_t *	pamh
+	pam_handle_t *pamh
 	int	flags
 	CODE:
+	  SET_CONV_FUNC;
 	  RETVAL = pam_open_session(pamh,flags);
 	OUTPUT:
 	RETVAL
 
 int
 pam_close_session(pamh, flags=0)
-	pam_handle_t *	pamh
+	pam_handle_t *pamh
 	int	flags
 	CODE:
+	  SET_CONV_FUNC;
 	  RETVAL = pam_close_session(pamh, flags);
 	OUTPUT:
 	RETVAL
 
 int
 pam_chauthtok(pamh, flags=0)
-	pam_handle_t *	pamh
+	pam_handle_t *pamh
 	int	flags
 	CODE:
+	  SET_CONV_FUNC;
 	  RETVAL = pam_chauthtok(pamh, flags);
 	OUTPUT:
 	RETVAL

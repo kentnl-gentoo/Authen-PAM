@@ -6,3 +6,4 @@ PAM.pm
 PAM.xs
 test.pl
 typemap
+xsubpp-1.9504.patch

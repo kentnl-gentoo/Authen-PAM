@@ -30,46 +30,54 @@ sub skip {
 }
 
 # $\ = "\n";
-$res = -1;
-$pam_service = "passwd";
+  $res = -1;
 
+  $pam_service = "login";
   $login_name = getlogin || getpwuid($<);
-  ok(2, $login_name);
+  if ($login_name) {
+      print "\nThe remaining tests will be run for service '$pam_service' ",
+		"and user name '$login_name'.\n";
+      print "To complete the test 8 you will be prompted to enter your ",
+		"UNIX password.\n\n";
+  }
+  else { print "Can't obtain a login name!\n"; }
 
-#  $res = Authen::PAM::_pam_start($pam_service, $login_name, \&Authen::PAM::pam_default_conv, $pamh);
+#  $res = pam_start($pam_service, $login_name, \&Authen::PAM::pam_default_conv, $pamh);
   $res = pam_start($pam_service, $login_name, $pamh);
-  ok(3, $res == PAM_SUCCESS);
+  ok(2, $res == PAM_SUCCESS);
 
   $res = pam_get_item($pamh, PAM_SERVICE, $item);
-  ok(4, $res == PAM_SUCCESS && $item eq $pam_service);
+  ok(3, $res == PAM_SUCCESS && $item eq $pam_service);
 
   $res = pam_get_item($pamh, PAM_USER, $item);
-  ok(5, $res == PAM_SUCCESS && $item eq $login_name);
+  ok(4, $res == PAM_SUCCESS && $item eq $login_name);
 
   $res = pam_get_item($pamh, PAM_CONV, $item);
-  ok(6, $res == PAM_SUCCESS && $item == \&Authen::PAM::pam_default_conv);
+  ok(5, $res == PAM_SUCCESS && $item == \&Authen::PAM::pam_default_conv);
 
   if (HAVE_PAM_ENV_FUNCTIONS) {
     $res = pam_putenv($pamh, "_ALPHA=alpha");
-    ok(7, $res == PAM_SUCCESS);
+    ok(6, $res == PAM_SUCCESS);
 
     %en = pam_getenvlist($pamh);
-    ok(8, $en{"_ALPHA"} eq "alpha");
+    ok(7, $en{"_ALPHA"} eq "alpha");
   }
   else {
+    skip(6, 'environment functions are not supported by your PAM library');
     skip(7, 'environment functions are not supported by your PAM library');
-    skip(8, 'environment functions are not supported by your PAM library');
   }
 
 #  $res = pam_chauthtok($pamh, 0);
 #  print "chauthtok returned ", pam_strerror ($pamh, $res);
 
-# $res = pam_authenticate($pamh, 0);
-# print "authenticate returned ", pam_strerror ($pamh, $res);
+  $res = pam_authenticate($pamh, 0);
+  ok(8, $res == PAM_SUCCESS);
+#  print "authenticate returned ", pam_strerror ($pamh, $res);
 
   $res = pam_end($pamh, 0);
   ok(9, $res == PAM_SUCCESS);
 
+  # Checking the OO interface
   $pamh = new Authen::PAM($pam_service, $login_name);
   ok(10, ref($pamh));
 
@@ -77,5 +85,7 @@ $pam_service = "passwd";
 #  print "chauthtok returned ", $pamh->pam_strerror($res);
 
   $pamh = 0;
+
+  print "\n";
 
   1;

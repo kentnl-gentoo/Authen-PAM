@@ -1,9 +1,9 @@
 
 				Authen::PAM 
 
-				Version 0.03
+				Version 0.04
 
-				06 Oct 1998
+				Oct 30 1998
 
 
 	Copyright (c) 1998 Nikolay Pelov. All rights reserved.
@@ -24,9 +24,10 @@ Before you can build Authen::PAM you need to have the following
 thing installed on your system:
 
     * Perl, version 5
-    * PAM library (either Linux-PAM or Solaris 2.6 PAM library)
+    * PAM library (either Linux-PAM or Solaris PAM library)
 
-  The Linux-PAM home page is http://www.kernel.org/pub/linux/libs/pam.
+  The Linux-PAM home page is http://www.kernel.org/pub/linux/libs/pam
+
 
 BUILDING AND INSTALLING THE MODULE
 ----------------------------------
@@ -56,6 +57,7 @@ the versions of PAM, Perl, Linux, glibc which you are using and eventualy
 all header files found in your /usr/include/security directory and I will
 try to fix it.
 
+
 KNOWN PROBLEMS
 --------------
 
@@ -67,13 +69,13 @@ with version 2.0.7-6 and it works ok.
 If you are using perl, version 5.004_03 then you will probably see the
 following error during the compilation of PAM.xs file to PAM.c:
 
-   PAM.c:715: invalid format `#line' directive.
+   PAM.c:NNN: invalid format `#line' directive.
 
 This is caused by a bug in the xsubpp compiler.
-The simpliest way to solve this problem is to open the file PAM.c and
-delete the line with the error (715).
+The simpliest way to solve this problem is to open the file PAM.c,
+delete the line with the error and run make again.
 
-The other solution is to patch you xsubpp compiler. Go to your perl lib
+The other solution is to patch your xsubpp compiler. Go to your perl
 directory (usually /usr/lib/perl5 or /usr/local/lib/perl5) and apply the
 patch xsubpp-1.9504.patch.
 
@@ -81,7 +83,7 @@ patch xsubpp-1.9504.patch.
 AUTHOR
 ------
 
-Nikolay Pelov <nikip@iname.com>
+  Nikolay Pelov <nikip@iname.com>
 
-The original distribution site of this module is 
-http://www.cs.kuleuven.ac.be/~pelov/pam
+  The original distribution site of this module is 
+  http://www.cs.kuleuven.ac.be/~pelov/pam
