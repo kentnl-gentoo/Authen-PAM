@@ -1,9 +1,9 @@
 
 				Authen::PAM 
 
-				Version 0.10
+				Version 0.11
 
-				2000-May-02
+				2000-Dec-06
 
 
 	Copyright (c) 1998-2000 Nikolay Pelov. All rights reserved.
@@ -43,6 +43,16 @@ using the following sequence of commands:
     make test
     make install
 
+By default the module is build using the compiler and options used to build
+the perl executable itself. If you want to change the C compiler then set
+the CC environment varible, for exmple like this:
+
+    CC=gcc perl Makefile.PL
+
+However, besides changing the compiler, it is still not possible to change
+any other options (for example CFLAGS). If you want to do this then you
+should edit by hand the generated Makefile.
+
 If you have any problems in building and installing the module then you
 should first check on the home page of the Authen::PAM module at address
 http://www.cs.kuleuven.ac.be/~pelov/pam/ for the latest development version
@@ -53,7 +63,7 @@ information:
   * the version of the perl - `perl -V'
   * if you are on linux:
     - the name and version of the distribution you are using
-    - the version of the pam - `ls /lib/libpam*' or `ls /usr/lib/libpam*'
+    - the version of the pam - `ls /lib/libpam.so*' or `ls /usr/lib/libpam.so*'
   * the description of the "login" service from your pam configuration -
     usually found in `/etc/pam.conf' file or in the file `/etc/pam.d/login'
   * the output of the `perl Makefile.PL', `make' and `make test'
@@ -66,6 +76,21 @@ information:
 
 KNOWN PROBLEMS
 ==============
+
+  RedHat 6.1
+  ----------
+  Many users are reporting the following problem when running 'make test'
+  on a RedHat 6.1 system:
+
+    -- Now you will be prompted to enter your unix password. On some systems
+    -- this test will succeed only if you are running as 'root'.
+    Password:
+    not ok 10 (Authentication failure)
+
+  The problem appears only when you use the 'su' command to change to another
+  user (including root).  If you login as 'root' or another user then 
+  everything works ok.
+
 
   Buggy glibc2
   ------------

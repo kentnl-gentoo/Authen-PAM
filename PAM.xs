@@ -41,31 +41,43 @@ extern "C" {
 
 #endif
 
+struct perl_pam_data {
+  SV* conv_func;
+  SV* delay_func;
+};
+
+typedef struct pam_conv sPamConv;
+typedef struct pam_response sPamResponse;
+typedef struct perl_pam_data sPerlPamData;
+
+/* 
+ * Gets conv_struct->appdata_ptr and casts it as a sPerlPamData
+ */
+sPerlPamData* 
+get_perl_pam_data(pamh)
+pam_handle_t *pamh;
+{
+    int res;
+    sPamConv *cs;
+    res = pam_get_item(pamh, PAM_CONV, (CONST_VOID **)&cs);
+    if (res != PAM_SUCCESS || cs == NULL || cs->appdata_ptr == NULL)
+        croak("Error in getting pam data!");
+    else
+        return (sPerlPamData*)cs->appdata_ptr;
+}
+
 
 #ifdef STATIC_CONV_FUNC
 
-    static SV *perl_conv_func = NULL;
+    static sPerlPamData *static_perl_pam_data = NULL;
 
-    #define SET_CONV_FUNC set_conv_func(pamh)
-
-    void set_conv_func(pamh)
-	pam_handle_t *pamh;
-    {
-	struct pam_conv *cs;
-	int res;
-	res = pam_get_item(pamh, PAM_CONV, (CONST_VOID **)&cs);
-	if (res == PAM_SUCCESS && cs != NULL && cs->appdata_ptr != NULL)
-	    perl_conv_func = cs->appdata_ptr;
-	else
-	    croak("Error in setting conversation function");
-    }
+    #define SET_CONV_FUNC(pamh) static_perl_pam_data = get_perl_pam_data(pamh)
 
 #else
 
-    #define SET_CONV_FUNC
+    #define SET_CONV_FUNC(pamh)
 
 #endif
-
 
 static int
 not_here(s)
@@ -77,15 +89,15 @@ char *s;
 
 
 static int
-conv_func(num_msg, msg, resp, appdata_ptr)
+my_conv_func(num_msg, msg, resp, appdata_ptr)
         int num_msg;
         CONST_STRUCT pam_message **msg;
-        struct pam_response **resp;
+        sPamResponse **resp;
         void *appdata_ptr;
 {
         int i,res_cnt,res;
 	STRLEN len;
-        struct pam_response *reply = NULL;
+        sPamResponse *reply = NULL;
         SV *strSV;
         char *str;
         dSP;
@@ -101,11 +113,12 @@ conv_func(num_msg, msg, resp, appdata_ptr)
         PUTBACK;
 
 #ifdef STATIC_CONV_FUNC
-	if (perl_conv_func == NULL)
-	    croak("Error in calling conversation function!");
-	appdata_ptr = perl_conv_func;
+	appdata_ptr = static_perl_pam_data;
 #endif
-        res_cnt = perl_call_sv(appdata_ptr, G_ARRAY);
+	if ( !SvTRUE(((sPerlPamData*)appdata_ptr)->conv_func) )
+	    croak("Calling empty conversation function!");
+        res_cnt = 
+	  perl_call_sv(((sPerlPamData*)appdata_ptr)->conv_func, G_ARRAY);
 
         SPAGAIN;
 
@@ -114,7 +127,7 @@ conv_func(num_msg, msg, resp, appdata_ptr)
 	    res_cnt--;
 	    if (res_cnt > 0) {
 		res_cnt /= 2;
-        	reply = malloc( res_cnt * sizeof(struct pam_response));
+        	reply = malloc( res_cnt * sizeof(sPamResponse));
         	for (i = res_cnt - 1; i >= 0; i--) {
         	    strSV = POPs;
         	    str = SvPV(strSV, len);
@@ -146,6 +159,40 @@ conv_func(num_msg, msg, resp, appdata_ptr)
         }
 
 	return res;
+}
+
+
+/*
+ * We must also handle setting a delay function with a prototype:
+ *
+ *     void (*delay_fn)(int retval, unsigned usec_delay, void *appdata_ptr);
+ *
+ * by a call to pam_set_item(pamh, PAM_FAIL_DELAY, fail_delay);
+ *
+ * Works only on Linux-PAM >= 0.68
+ */
+void
+my_delay_func(status, delay, appdata_ptr)
+int status;
+unsigned int delay;
+void *appdata_ptr;
+{
+    dSP ;
+
+    if (appdata_ptr == NULL)
+        croak("Empty perl pam data");
+    if (!SvTRUE(((sPerlPamData*)appdata_ptr)->delay_func))
+        croak("Calling empty delay function!");
+    
+    /* printf("st: %d, dl: %d\n",status,delay); */
+
+    PUSHMARK(sp) ;
+    XPUSHs(sv_2mortal(newSViv(status)));
+    XPUSHs(sv_2mortal(newSViv(delay)));
+    PUTBACK ;
+
+    perl_call_sv(((sPerlPamData*)appdata_ptr)->delay_func, 
+		 G_VOID | G_DISCARD);
 }
 
 static double
@@ -378,20 +425,6 @@ not_there:
     return 0;
 }
 
-/*
- * We must also handle setting a delay function with a prototype:
- *
- *     void (*fail_delay)(int status, unsigned int delay);
- *
- * by a call to pam_set_item(pamh, PAM_FAIL_DELAY, fail_delay);
- */
-void
-my_fail_delay(status, delay)
-int status;
-unsigned int delay;
-{
-}
-
 
 MODULE = Authen::PAM	PACKAGE = Authen::PAM
 
@@ -405,31 +438,71 @@ constant(name,arg)
 
 
 int
+_pam_start(service_name, user, func, pamh)
+	const char *service_name
+	const char *user
+	SV *func
+	pam_handle_t *pamh = NO_INIT
+	PREINIT:
+	  sPamConv conv_st;
+	CODE:
+	  conv_st.conv = my_conv_func;
+	  conv_st.appdata_ptr = malloc(sizeof(sPerlPamData));
+	  ((sPerlPamData*)conv_st.appdata_ptr)->conv_func = newSVsv(func);
+	  ((sPerlPamData*)conv_st.appdata_ptr)->delay_func = newSViv(0);
+
+	  RETVAL = pam_start(service_name, user, &conv_st, &pamh);
+        OUTPUT:
+	  pamh
+	  RETVAL
+
+int
+pam_end(pamh, pam_status=PAM_SUCCESS)
+	pam_handle_t *pamh
+	int	pam_status
+	PREINIT:
+	  sPerlPamData *data;
+	  int res;
+	CODE:
+	  data = get_perl_pam_data(pamh);
+          SvREFCNT_dec(data->conv_func); 
+          SvREFCNT_dec(data->delay_func); 
+	  free(data);
+
+          RETVAL = pam_end(pamh, pam_status);
+	OUTPUT:
+	RETVAL
+
+int
 pam_set_item(pamh, item_type, item)
 	pam_handle_t *pamh
 	int	item_type
-	char	*item
+	SV	*item
 	PREINIT:
-	  struct pam_conv *conv_st;
+	  sPerlPamData *data;
 	  int res;
 	CODE:
 	  if (item_type == PAM_CONV) {
-	    res = pam_get_item( pamh, PAM_CONV, 
-				(CONST_VOID **)&conv_st);
-	    if (res == PAM_SUCCESS) {
-		sv_setsv(conv_st->appdata_ptr, (SV*)item);
-	        RETVAL = pam_set_item( pamh, PAM_CONV, conv_st);
-	    } 
-	    else
-	        RETVAL = res;
+	      data = get_perl_pam_data(pamh);
+	      sv_setsv(data->conv_func, item);
+	      RETVAL = PAM_SUCCESS;
 	  }
 #if defined(PAM_FAIL_DELAY)
           else if (item_type == PAM_FAIL_DELAY) {
-	      croak("setting a delay function is still not implemented");
+	      data = get_perl_pam_data(pamh);
+	      sv_setsv(data->delay_func, item);
+	      if (SvTRUE(item))
+	          RETVAL = pam_set_item( pamh, item_type, my_delay_func);
+	      else
+	          RETVAL = pam_set_item( pamh, item_type, NULL);
 	  }
 #endif
 	  else
-	    RETVAL = pam_set_item( pamh, item_type, item);
+#if (PERL_API_REVISION == 5 && PERL_API_VERSION >= 5)
+	      RETVAL = pam_set_item( pamh, item_type, SvPV_nolen(item));
+#else
+	      RETVAL = pam_set_item( pamh, item_type, SvPV(item,na));
+#endif
 	OUTPUT:
 	RETVAL
 	
@@ -440,24 +513,23 @@ pam_get_item(pamh, item_type, item)
 	SV	*item
 	PREINIT:
 	  char *c;
-	  struct pam_conv *conv_st;
+	  sPerlPamData *data;
 	  int res;
 	CODE:
 	  if (item_type == PAM_CONV) {
-	      res = pam_get_item( pamh, PAM_CONV, 
-					(CONST_VOID **)&conv_st);
-	      if (res == PAM_SUCCESS) 
-	          sv_setsv(item, conv_st->appdata_ptr);
-	      RETVAL = res;
+	      data = get_perl_pam_data(pamh);
+	      sv_setsv(item, data->conv_func);
+	      RETVAL = PAM_SUCCESS;
 	  }
 #if defined(PAM_FAIL_DELAY)
           else if (item_type == PAM_FAIL_DELAY) {
-	      croak("getting a delay function is still not implemented");
+	      data = get_perl_pam_data(pamh);
+	      sv_setsv(item, data->delay_func);
+	      RETVAL = PAM_SUCCESS;
  	  }
 #endif
 	  else {
-	      RETVAL = pam_get_item( pamh, item_type, 
-					(CONST_VOID **)&c);
+	      RETVAL = pam_get_item( pamh, item_type, (CONST_VOID **)&c);
 	      sv_setpv(item, c);
 	  }
 	OUTPUT:
@@ -535,7 +607,6 @@ _pam_getenvlist(pamh)
 	CODE:
 	  not_here("pam_getenvlist");
 
-
 #endif
 
 
@@ -543,10 +614,10 @@ _pam_getenvlist(pamh)
 
 int
 pam_fail_delay(pamh, musec_delay)
-	pam_handle_t *	pamh
-	unsigned int	musec_delay
+	pam_handle_t *pamh
+	unsigned int musec_delay
 	CODE:
-	  RETVAL = pam_fail_delay(pamh,musec_delay);
+	  RETVAL = pam_fail_delay(pamh, musec_delay);
 	OUTPUT:
 	RETVAL
 
@@ -563,55 +634,11 @@ pam_fail_delay(pamh, musec_delay)
 
 
 int
-_pam_start(service_name, user, func, pamh)
-	const char *service_name
-	const char *user
-	SV *func
-	pam_handle_t *pamh = NO_INIT
-	PREINIT:
-	  struct pam_conv conv_st;
-	CODE:
-	  conv_st.conv = conv_func;
-	  conv_st.appdata_ptr = newSVsv(func);
-
-	  RETVAL = pam_start(service_name, user, &conv_st, &pamh);
-OUTPUT:
-	pamh
-	RETVAL
-
-int
-pam_end(pamh, pam_status=PAM_SUCCESS)
-	pam_handle_t *pamh
-	int	pam_status
-	PREINIT:
-	  struct pam_conv *conv_st;
-	  int res;
-	CODE:
-	  res = pam_get_item(pamh, PAM_CONV, 
-				(CONST_VOID **)&conv_st);
-	  if (res == PAM_SUCCESS) {
-
-	      if (conv_st == 0)
-		  croak("Error in freeing conv function");
-
-	      if (conv_st->appdata_ptr != 0) {
-		SvREFCNT_dec((SV*)conv_st->appdata_ptr); 
-		conv_st->appdata_ptr = 0;
-	      }
-
-	      RETVAL = pam_end(pamh, pam_status);
-	  }
-	  else
-	      RETVAL = res;
-	OUTPUT:
-	RETVAL
-
-int
 pam_authenticate(pamh, flags=0)
 	pam_handle_t *pamh
 	int	flags
 	CODE:
-	  SET_CONV_FUNC;
+	  SET_CONV_FUNC(pamh);
 	  RETVAL = pam_authenticate(pamh,flags);
 	OUTPUT:
 	RETVAL
@@ -621,7 +648,7 @@ pam_setcred(pamh, flags)
 	pam_handle_t *pamh
 	int	flags
 	CODE:
-	  SET_CONV_FUNC;
+	  SET_CONV_FUNC(pamh);
 	  RETVAL = pam_setcred(pamh,flags);
 	OUTPUT:
 	RETVAL
@@ -631,7 +658,7 @@ pam_acct_mgmt(pamh, flags=0)
 	pam_handle_t *pamh
 	int	flags
 	CODE:
-	  SET_CONV_FUNC;
+	  SET_CONV_FUNC(pamh);
 	  RETVAL = pam_acct_mgmt(pamh,flags);
 	OUTPUT:
 	RETVAL
@@ -641,7 +668,7 @@ pam_open_session(pamh, flags=0)
 	pam_handle_t *pamh
 	int	flags
 	CODE:
-	  SET_CONV_FUNC;
+	  SET_CONV_FUNC(pamh);
 	  RETVAL = pam_open_session(pamh,flags);
 	OUTPUT:
 	RETVAL
@@ -651,7 +678,7 @@ pam_close_session(pamh, flags=0)
 	pam_handle_t *pamh
 	int	flags
 	CODE:
-	  SET_CONV_FUNC;
+	  SET_CONV_FUNC(pamh);
 	  RETVAL = pam_close_session(pamh, flags);
 	OUTPUT:
 	RETVAL
@@ -661,7 +688,7 @@ pam_chauthtok(pamh, flags=0)
 	pam_handle_t *pamh
 	int	flags
 	CODE:
-	  SET_CONV_FUNC;
+	  SET_CONV_FUNC(pamh);
 	  RETVAL = pam_chauthtok(pamh, flags);
 	OUTPUT:
 	RETVAL

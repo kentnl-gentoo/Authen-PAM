@@ -891,13 +891,14 @@ if test $pam_cv_func_env = yes; then
 EOF
 
 fi
+
 echo $ac_n "checking for RTLD_GLOBAL flag""... $ac_c" 1>&6
-echo "configure:896: checking for RTLD_GLOBAL flag" >&5
+echo "configure:897: checking for RTLD_GLOBAL flag" >&5
 if eval "test \"`echo '$''{'pam_cv_decl_rtld_global'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 901 "configure"
+#line 902 "configure"
 #include "confdefs.h"
 #include <dlfcn.h>
 #ifdef RTLD_GLOBAL

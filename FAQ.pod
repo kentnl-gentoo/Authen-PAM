@@ -48,8 +48,7 @@ how to do this:
 	$ans = $username if ($code == PAM_PROMPT_ECHO_ON() );
 	$ans = $password if ($code == PAM_PROMPT_ECHO_OFF() );
 
-        push @res, PAM_SUCCESS();
-        push @res, $ans;
+        push @res, (PAM_SUCCESS(),$ans);
     }
     push @res, PAM_SUCCESS();
     return @res;
@@ -81,7 +80,7 @@ different prompts. Here is an example:
   $username = "foo";
   $oldpassword = "bar_old";
   $newpassword = "bar_new";
-  
+
   sub my_conv_func {
     my @res;
     while ( @_ ) {
@@ -98,8 +97,7 @@ different prompts. Here is an example:
 	  $state++;
         }
 
-        push @res, PAM_SUCCESS();
-        push @res, $ans;
+        push @res, (PAM_SUCCESS(),$ans);
     }
     push @res, PAM_SUCCESS();
     return @res;

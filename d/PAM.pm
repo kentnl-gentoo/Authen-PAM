@@ -1,6 +1,6 @@
 #This is a dummy file so CPAN will find a VERSION
 package Authen::PAM;
-$VERSION = "0.10";
+$VERSION = "0.11";
 #This is to make sure require will return an error
 0;
 __END__
@@ -13,30 +13,31 @@ Authen::PAM - Perl interface to PAM library
 
   use Authen::PAM;
 
-  $retval = pam_start($service_name, $user, $pamh);
-  $retval = pam_start($service_name, $user, $conv_func, $pamh);
-  $retval = pam_end($pamh, $pam_status);
+  $res = pam_start($service_name, $user, $pamh);
+  $res = pam_start($service_name, $user, \my_conv_func, $pamh);
+  $res = pam_end($pamh, $pam_status);
 
-  $retval = pam_authenticate($pamh, $flags);
-  $retval = pam_setcred($pamh, $flags);
-  $retval = pam_acct_mgmt($pamh, $flags);
-  $retval = pam_open_session($pamh, $flags);
-  $retval = pam_close_session($pamh, $flags);
-  $retval = pam_chauthtok($pamh, $flags);
+  $res = pam_authenticate($pamh, $flags);
+  $res = pam_setcred($pamh, $flags);
+  $res = pam_acct_mgmt($pamh, $flags);
+  $res = pam_open_session($pamh, $flags);
+  $res = pam_close_session($pamh, $flags);
+  $res = pam_chauthtok($pamh, $flags);
 
   $error_str = pam_strerror($pamh, $errnum);
 
-  $retval = pam_set_item($pamh, $item_type, $item);
-  $retval = pam_get_item($pamh, $item_type, $item);
+  $res = pam_set_item($pamh, $item_type, $item);
+  $res = pam_get_item($pamh, $item_type, $item);
 
-  if (HAVE_PAM_ENV_FUNCTIONS) {
-      $retval = pam_putenv($pamh, $name_value);
+  if (HAVE_PAM_ENV_FUNCTIONS()) {
+      $res = pam_putenv($pamh, $name_value);
       $val = pam_getenv($pamh, $name);
       %env = pam_getenvlist($pamh);
   }
 
-  if (HAVE_PAM_FAIL_DELAY) {
-      $retval = pam_fail_delay($pamh, $musec_delay);
+  if (HAVE_PAM_FAIL_DELAY()) {
+      $res = pam_fail_delay($pamh, $musec_delay);
+      $res = pam_set_item($pamh, PAM_FAIL_DELAY(), \my_fail_delay_func);
   }
 
 =head1 DESCRIPTION
@@ -62,8 +63,8 @@ library (e.g. pam_fail_delay) then the corresponding HAVE_PAM_XXX
 constant will have a value 1 otherwise it will return 0.
 
 For compatibility with older PAM libraries I have added the constant
-HAVE_PAM_ENV_FUNCTIONS which is true if your PAM library has the set
-of functions for handling the environment variables (pam_putenv, pam_getenv,
+HAVE_PAM_ENV_FUNCTIONS which is true if your PAM library has the
+functions for handling environment variables (pam_putenv, pam_getenv,
 pam_getenvlist).
 
 
@@ -75,23 +76,23 @@ library here is the interface:
   use Authen::PAM qw(:constants);
 
   $pamh = new Authen::PAM($service_name, $user);
-  $pamh = new Authen::PAM($service_name, $user, $conv_func);
+  $pamh = new Authen::PAM($service_name, $user, \my_conv_func);
 
   ref($pamh) || die "Error code $pamh during PAM init!";
 
-  $retval = $pamh->pam_authenticate($flags);
-  $retval = $pamh->pam_setcred($flags);
-  $retval = $pamh->pam_acct_mgmt($flags);
-  $retval = $pamh->pam_open_session($flags);
-  $retval = $pamh->pam_close_session($flags);
-  $retval = $pamh->pam_chauthtok($flags);
+  $res = $pamh->pam_authenticate($flags);
+  $res = $pamh->pam_setcred($flags);
+  $res = $pamh->pam_acct_mgmt($flags);
+  $res = $pamh->pam_open_session($flags);
+  $res = $pamh->pam_close_session($flags);
+  $res = $pamh->pam_chauthtok($flags);
 
   $error_str = $pamh->pam_strerror($errnum);
 
-  $retval = $pamh->pam_set_item($item_type, $item);
-  $retval = $pamh->pam_get_item($item_type, $item);
+  $res = $pamh->pam_set_item($item_type, $item);
+  $res = $pamh->pam_get_item($item_type, $item);
 
-  $retval = $pamh->pam_putenv($name_value);
+  $res = $pamh->pam_putenv($name_value);
   $val = $pamh->pam_getenv($name);
   %env = $pamh->pam_getenvlist;
 
@@ -134,7 +135,7 @@ conversation function (usually PAM_SUCCESS).
 
 Here is a sample form of the PAM conversation function:
 
-  sub pam_conv_func {
+  sub my_conv_func {
       my @res;
       while ( @_ ) {
           my $msg_type = shift;
@@ -144,10 +145,9 @@ Here is a sample form of the PAM conversation function:
 
 	 # switch ($msg_type) { obtain value for $ans; }
 
-         push @res, 0;
-         push @res, $ans;
+         push @res, (0,$ans);
       }
-      push @res, PAM_SUCCESS;
+      push @res, PAM_SUCCESS();
       return @res;
   }
 

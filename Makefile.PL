@@ -2,8 +2,7 @@ use ExtUtils::MakeMaker;
 use Config;
 
 sub configure {
-    $ENV{'CC'} = $Config{'cc'};
-    $ENV{'CPP'} = $Config{'cpprun'};
+    $ENV{'CC'} or $ENV{'CC'} = $Config{'cc'};
 
     system "./configure";
 

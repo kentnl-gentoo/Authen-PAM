@@ -1,5 +1,15 @@
 Revision history for Perl extension Authen::PAM.
 
+0.11  2000-Dec-06
+	- reorganized the PAM.xs for easier support of callback functions
+	- added support for user (perl) defined fail_delay function
+	- the pam_fail_delay function was not exported
+	- fixed a bug when calling pam_set_item($pamh, PAM_CONV_FUNC, ...)
+	- the PAM.xs now compiles on perl 5.6 (thanks to Roland Pope 
+	  <rpope@jade.co.nz>) 
+ 	- the compiler can be changed by setting the environment variable
+	  CC before calling 'perl Makefile.PL'
+
 0.10  2000-May-02
 	- fixed some small problems with the constructor 'new'
 	  (thanks to <wil@langford.net>)
@@ -8,7 +18,7 @@ Revision history for Perl extension Authen::PAM.
 	  new versions of the Linux PAM library
 
 0.09  2000-Feb-03
-	- fixed a bug in PAM.xs when more then one messages are given
+	- fixed a bug in PAM.xs when more than one messages are given
 	  to the conversation function (thanks to Oleg Bulavsky 
 	  <bulch@sibnet.ru>)
 	- small changes to the test script
@@ -60,7 +70,7 @@ Revision history for Perl extension Authen::PAM.
 	- the module is now compatible with Solaris 2.6 PAM library
 	  (thanks to Lupe Christoph <lupe@lupe-christoph.de>)
 	- added object oriented interface
-	- added default value for $flags argument in most of the functions
+	- added default value for $flags argument for most of the functions
 
 0.01  1998-May-18
 	- original version; created by h2xs 1.18
