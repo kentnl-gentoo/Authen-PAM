@@ -1,0 +1,103 @@
+                                  Authen::PAM 
+
+                                  Version 0.01
+
+                                  04 May 1998
+
+
+	Copyright (c) 1998 Nikolay Pelov. All rights reserved.
+	This program is free software; you can redistribute it and/or
+	modify it under the same terms as Perl itself.
+
+
+DESCRIPTION
+-----------
+
+This module provides a Perl interface to the PAM library.
+
+
+PREREQUISITES
+-------------
+
+Before you can build Authen::PAM you need to have the following
+thing installed on your system:
+
+    * Perl, version 5.004_04
+    * Linux-PAM library
+
+  The Linux-PAM home page is http://www.kernel.org/pub/linux/libs/pam.
+
+
+BUILDING AND INSTALLING THE MODULE
+----------------------------------
+
+Assuming you have met all the prerequisites, building the module should
+be relatively straightforward.
+
+The module can now be built using this sequence of commands:
+
+    perl Makefile.PL
+    make
+    make test
+    make install
+
+If you have problems in the first step the you probably don't have a PAM 
+library installed on your system.
+
+The 'make' command can fail if there is some incompatibility between the 
+version of PAM which you are using and the current implementation of this
+module. In this case please write me a mail with the problems you see,
+the versions of PAM, Perl, Linux, glibc which you are using and eventualy
+all header files found in your /usr/include/security directory and I will
+try to fix it.
+
+KNOWN PROBLEMS
+--------------
+
+If you are using RedHat 5.0 distribution then you should upgrade your 
+glibc package because it has a bug in the dlopen function. I tested it
+with version 2.0.7-6 and it works ok.
+
+
+If you are using perl, version 5.004_03 then you will probably see the
+following error during the compilation of PAM.xs file to PAM.c:
+
+   PAM.c:715: invalid format `#line' directive.
+
+This is caused by a bug in the xsubpp compiler.
+The simpliest way to solve this problem is to open the file PAM.c and
+delete the line with the error (715).
+
+The other solution is to patch you xsubpp compiler. Go to your perl lib
+directory (usually /usr/lib/perl5 or /usr/local/lib/perl5) and apply the
+following patch:
+
+
+--- ExtUtils/xsubpp     Thu Jun  4 14:46:59 1998
++++ ExtUtils/xsubpp.new Thu Jun  4 14:46:08 1998
+@@ -87,7 +87,7 @@
+
+ # Global Constants
+
+-$XSUBPP_version = "1.9504";
++$XSUBPP_version = "1.9505";
+
+ my ($Is_VMS, $SymSet);
+ if ($^O eq 'VMS') {
+@@ -294,7 +294,7 @@
+     do { $_ = shift(@line) } while !/\S/ && @line;
+
+     print("#line ", $line_no[@line_no - @line -1], " \"$filename\"\n")
+-       if $WantLineNumbers && !/^\s*#\s*line\b/;
++       if $WantLineNumbers && !/^\s*#\s*line\b/ && !/^#if XSubPPtmp/;
+     for (;  defined($_) && !/^$BLOCK_re/o;  $_ = shift(@line)) {
+        print "$_\n";
+     }
+
+
+
+AUTHOR
+------
+
+Nikolay Pelov <nikip@iname.com>
+

@@ -1,0 +1,8 @@
+Changes
+MANIFEST
+README
+Makefile.PL
+PAM.pm
+PAM.xs
+test.pl
+typemap
