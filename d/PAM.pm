@@ -1,6 +1,6 @@
 #This is a dummy file so CPAN will find a VERSION
 package Authen::PAM;
-$VERSION = "0.14";
+$VERSION = "0.15";
 #This is to make sure require will return an error
 0;
 __END__
@@ -13,6 +13,7 @@ Authen::PAM - Perl interface to PAM library
 
   use Authen::PAM;
 
+  $res = pam_start($service_name, $pamh);
   $res = pam_start($service_name, $user, $pamh);
   $res = pam_start($service_name, $user, \&my_conv_func, $pamh);
   $res = pam_end($pamh, $pam_status);
@@ -44,10 +45,13 @@ Authen::PAM - Perl interface to PAM library
 
 The I<Authen::PAM> module provides a Perl interface to the I<PAM>
 library. The only difference with the standard PAM interface is that
-instead of passing a pam_conv struct which has an additional
-context parameter appdata_ptr, you must only give an address to a
-conversation function written in Perl (see below).
-If you use the 3 argument version of pam_start then a default conversation
+instead of passing a pam_conv struct which has an additional context
+parameter appdata_ptr, you must only give an address to a conversation
+function written in Perl (see below).
+
+If you want to pass a NULL pointer as a value of the $user in
+pam_start use undef or the two-argument version. Both in the two and
+the three-argument versions of pam_start a default conversation
 function is used (Authen::PAM::pam_default_conv).
 
 The $flags argument is optional for all functions which use it
@@ -75,6 +79,7 @@ library here is the interface:
 
   use Authen::PAM qw(:constants);
 
+  $pamh = new Authen::PAM($service_name);
   $pamh = new Authen::PAM($service_name, $user);
   $pamh = new Authen::PAM($service_name, $user, \&my_conv_func);
 
@@ -131,7 +136,9 @@ must return a list with the same number of pairs ($resp_retcode,
 $resp) with replies to the input messages. For now the $resp_retcode
 is not used and must be always set to 0. In addition the user must
 append to the end of the resulting list the return code of the
-conversation function (usually PAM_SUCCESS).
+conversation function (usually PAM_SUCCESS). If you want to abort
+the conversation function for some reason then just return an error
+code, normally PAM_CONV_ERR.
 
 Here is a sample form of the PAM conversation function:
 
@@ -151,13 +158,14 @@ Here is a sample form of the PAM conversation function:
       return @res;
   }
 
+More examples can be found in the L<Authen::PAM:FAQ>.
 
 =head1 COMPATIBILITY
 
 The following constant names: PAM_AUTHTOKEN_REQD, PAM_CRED_ESTABLISH,
 PAM_CRED_DELETE, PAM_CRED_REINITIALIZE, PAM_CRED_REFRESH are used by
 some older version of the Linux-PAM library and are not exported by
-default. If you really want them, then load the module with
+default. If you really want them, load the module with
 
   use Authen::PAM qw(:DEFAULT :old);
 
@@ -166,15 +174,16 @@ functions such as pam_system_log.
 
 =head1 SEE ALSO
 
-PAM Application developer's Manual
+PAM Application developer's Manual,
+L<Authen::PAM::FAQ>
 
 =head1 AUTHOR
 
-Nikolay Pelov pelov@cs.kuleuven.ac.be
+Nikolay Pelov <NIKIP at cpan.org>
 
 =head1 COPYRIGHT
 
-Copyright (c) 1998-2002 Nikolay Pelov. All rights reserved. This
+Copyright (c) 1998-2004 Nikolay Pelov. All rights reserved. This
 program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
 

@@ -1,12 +1,12 @@
 
 				Authen::PAM 
 
-				Version 0.14
+				Version 0.15
 
-				2003-Jan-22
+				2004-Nov-8
 
 
-	Copyright (c) 1998-2003 Nikolay Pelov. All rights reserved.
+	Copyright (c) 1998-2004 Nikolay Pelov. All rights reserved.
 	This program is free software; you can redistribute it and/or
 	modify it under the same terms as Perl itself.
 
@@ -17,6 +17,9 @@ DESCRIPTION
 This module provides a Perl interface to the PAM library.
 
 Home site: <http://www.cs.kuleuven.ac.be/~pelov/pam/>
+
+After installing the module you can read a small faq with
+examples by typing 'perldoc Authen::PAM::FAQ'.
 
 
 PREREQUISITES
@@ -74,7 +77,7 @@ information:
   * any relevant messages produced by the syslogd daemon -
     usually found in `/var/log/messages'
   * if the problem is in a perl script which uses the Authen::PAM module then
-    the source of this program (even if it is a slight modification of some
+    the source of this script (even if it is a slight modification of some
     of the source code provided with this module)
 
 
@@ -86,11 +89,13 @@ KNOWN PROBLEMS
 
   I know that this is trivial, but some people actually report this.
   If you get an error like
+
 	PAM.xs:11: security/pam_appl.h: No such file or directory
+
   this means that either you don't have the PAM library installed on
   your system or at least the PAM header files are missing. If your
   distribution provides the PAM library as packages then you should
-  check that you have also installed the pam-dev or pam-devel package.
+  check that you also have installed the pam-dev or pam-devel package.
 
 
   FreeBSD 4.x
@@ -122,74 +127,28 @@ KNOWN PROBLEMS
   some users (especially root) depending on the tty or the host name
   they are logging from. The configuration files of these two modules
   are /etc/securetty and  /etc/security/access.conf respectively.
-  So if you are running 'make test' and get an error 
+  So, if you are running 'make test' and get an error 
   '(Authentication failure)' on test 10 then this might be due to
   login restrictions of PAM.
 
 
-  RedHat 6.1
+  Deprecated
   ----------
-  Many users are reporting the following problem when running 'make test'
-  on a RedHat 6.1 system:
 
-    -- Now you will be prompted to enter your unix password. On some systems
-    -- this test will succeed only if you are running as 'root'.
-    Password:
-    not ok 10 (Authentication failure)
+  The following problems occured on old versions of libraries and OSes
+  and are not included in the README file anymore. If you experience them,
+  check the README file in older versions of the PAM library (0.14 or less).
+  - Solaris 2.6 buggy PAM library
+  - Perl 5.004_03
+  - RedHat 6.1 (Authentication failure)
+  - RedHat 8.0 (Segmentation fault (core dumped))
 
-  The problem appears only when you use the 'su' command to change to another
-  user (including root).  If you login as 'root' or another user then 
-  everything works ok.
-
-
-  Buggy glibc2
-  ------------
-  Some of the first versions of the glibc2 libraries have a bug in the
-  dlopen function which will prevent this module from working. If you are
-  using an original RedHat 5.0 distribution then you probably have this
-  problem.
-  I know that the bug is fixed in at least version 2.0.7-6 of the glibc2
-  library.
-
-
-  Bug in the Solaris 2.6 PAM library
-  ----------------------------------
-  There is a known bug in the Solaris 2.6 PAM library for which I have
-  implemented a workaround. This bug is fixed in Solaris 2.7.
-  The name and the version of your OS is determined by looking at the
-  variables 'osname' and 'osvers' from the perl 'Config' module and if they 
-  match 'solaris' and '2.6' then the workaround is activated. 
-  To see the values of these variables you can use `perl -V:osname -V:osvers'.
-
-  If you are building this module on a different version of Solaris (e.g 2.7)
-  and you are planning to use it on Solaris 2.6 or if you are working on
-  Solaris 2.6 and your perl is build on a different version of Solaris
-  (and hence the value of 'osvers' is not '2.6') then you must activate the 
-  workaround manually by running
-
-     perl Makefile.PL -DSTATIC_CONV_FUNC
-
-
-  Perl version 5.004_03
-  ---------------------
-  If you are using perl, version 5.004_03 then you will probably see the
-  following error during the compilation of PAM.xs file to PAM.c:
-
-     PAM.c:NNN: invalid format `#line' directive.
-
-  This is caused by a bug in the perl xsubpp compiler.
-  The simplest way to solve this problem is to open the file PAM.c,
-  delete the line with the error and run make again.
-
-  The other solution is to patch your xsubpp compiler. Go to your perl
-  directory (usually /usr/lib/perl5 or /usr/local/lib/perl5) and apply the
-  patch xsubpp-1.9504.patch.
 
 
 AUTHOR
 ======
 
-  Nikolay Pelov <pelov@cs.kuleuven.ac.be>
+  Nikolay Pelov <NIKIP at cpan dot org>
 
   Web page: <http://www.cs.kuleuven.ac.be/~pelov/pam/>
 

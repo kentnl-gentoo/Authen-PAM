@@ -1,15 +1,15 @@
 Changes
 MANIFEST
 README
-FAQ.pod
+PAM/FAQ.pod
 Makefile.PL
 PAM.pm.in
 PAM.xs
 test.pl
 typemap
-xsubpp-1.9504.patch
 configure
 configure.ac
 PAM_config.h.in
 pam.cfg.in
 d/PAM.pm
+META.yml                                 Module meta-data (added by MakeMaker)

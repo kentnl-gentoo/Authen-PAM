@@ -1,14 +1,14 @@
 =head1 NAME
 
-pam_faq - Frequently-Asked Questions about Authen::PAM.
+Authen::PAM::FAQ - Frequently-Asked Questions about Authen::PAM.
 
 =head1 SYNOPSIS
 
-perldoc pam_faq
+perldoc Authen::PAM::FAQ
 
 =head1 VERSION
 
-This document is currently at version I<0.02>, as of I<Oct 5, 2001>
+This document is currently at version I<0.04>, as of I<Nov 8, 2004>
 
 =head1 DESCRIPTION
 
@@ -33,10 +33,12 @@ then usually you will not be asked for it. Here is a simple example
 how to do this:
 
   use Authen::PAM;
+  use POSIX;
 
   $service = "login";
   $username = "foo";
   $password = "bar";
+  $tty_name = ttyname(fileno(STDIN));
 
   sub my_conv_func {
     my @res;
@@ -130,35 +132,17 @@ use for additional test or for debugging purposes, e.g.
   }
 
 
-=begin comment
-
- =head2 3. Is there a conversation function which translates the PAM
-requests to HTML form?
-
-So far I am not aware of any. However if you known that there exists
-or want to write one you can contact me.
-
-The idea of implementing such web interface is that when the
-conversation function is called it constructs a HTML page from the
-input codes and strings. The major problem with this approach is that
-the HTTP protocol is stateless. To overcome this difficulty you should
-write some daemon program which interacts with the PAM library and
-keeps the current state of the conversation.
-
-=end comment
-
-
 =head1 SEE ALSO
 
 L<Authen::PAM>
 
 =head1 AUTHOR
 
-Nikolay Pelov pelov@cs.kuleuven.ac.be
+Nikolay Pelov <NIKIP at cpan.org>
 
 =head1 COPYRIGHT
 
-Copyright (c) 1998-2001 Nikolay Pelov. All rights reserved. This file
+Copyright (c) 1998-2004 Nikolay Pelov. All rights reserved. This file
 is part of the Authen::PAM library. This library is free software; you
 can redistribute it and/or modify it under the same terms as Perl
 itself.

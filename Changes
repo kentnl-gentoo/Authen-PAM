@@ -1,5 +1,16 @@
 Revision history for Perl extension Authen::PAM.
 
+0.15  2004-Nov-8
+	- small changes to the FAQ
+	- fixed pam_start to pass NULL to PAM if no user is given
+	  (thanks to Angus Lees)
+	- the test script will die if it cannot find a tty
+	- if the test script cannot obtain the username it will force PAM to
+	  ask for it
+	- removed some trivial tests
+	- the user can now abort the conversation function by returning
+	  some error code (thanks to Penelope Fudd)
+
 0.14  2003-Jan-22
 	- upgraded to autoconf 2.53 and did a major rewrite of the 
 	  configure script 

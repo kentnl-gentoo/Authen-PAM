@@ -135,7 +135,11 @@ my_conv_func(num_msg, msg, resp, appdata_ptr)
 
         SPAGAIN;
 	
-        if (res_cnt == 2*num_msg + 1) {
+        if (res_cnt == 1) { // only return code
+	  res = POPi;
+	  reply = NULL;
+        } 
+	else if (res_cnt == 2*num_msg + 1) {
 	    res = POPi;
 	    res_cnt--;
 	    if (res_cnt > 0) {
@@ -461,14 +465,17 @@ constant(name,arg)
 
 
 int
-_pam_start(service_name, user, func, pamh)
+_pam_start(service_name, user_sv, func, pamh)
 	const char *service_name
-	const char *user
+	SV *user_sv
 	SV *func
 	pam_handle_t *pamh = NO_INIT
 	PREINIT:
 	  sPamConv conv_st;
+	  const char *user;
 	CODE:
+	  user = SvOK(user_sv) ? SvPV_nolen(user_sv) : NULL;
+
 	  conv_st.conv = my_conv_func;
 	  conv_st.appdata_ptr = malloc(sizeof(sPerlPamData));
 	  ((sPerlPamData*)conv_st.appdata_ptr)->conv_func = newSVsv(func);
