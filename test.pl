@@ -18,11 +18,15 @@ print "ok 1\n";
 # (correspondingly "not ok 13") depending on the success of chunk 13
 # of the test code):
 
-sub ok
-{
+sub ok {
     my ($no, $ok) = @_ ;
     print "ok $no\n" if $ok ;
     print "not ok $no\n" unless $ok ;
+}
+
+sub skip {
+    my ($no, $msg) = @_ ;
+    print "skipped $no: $msg\n";
 }
 
 # $\ = "\n";
@@ -45,11 +49,17 @@ $pam_service = "passwd";
   $res = pam_get_item($pamh, PAM_CONV, $item);
   ok(6, $res == PAM_SUCCESS && $item == \&Authen::PAM::pam_default_conv);
 
-  $res = pam_putenv($pamh, "_ALPHA=alpha");
-  ok(7, $res == PAM_SUCCESS);
+  if (HAVE_PAM_ENV_FUNCTIONS) {
+    $res = pam_putenv($pamh, "_ALPHA=alpha");
+    ok(7, $res == PAM_SUCCESS);
 
-  %en = pam_getenvlist($pamh);
-  ok(8, $en{"_ALPHA"} eq "alpha");
+    %en = pam_getenvlist($pamh);
+    ok(8, $en{"_ALPHA"} eq "alpha");
+  }
+  else {
+    skip(7, 'environment functions are not supported by your PAM library');
+    skip(8, 'environment functions are not supported by your PAM library');
+  }
 
 #  $res = pam_chauthtok($pamh, 0);
 #  print "chauthtok returned ", pam_strerror ($pamh, $res);

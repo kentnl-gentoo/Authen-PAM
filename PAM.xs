@@ -10,6 +10,15 @@ extern "C" {
 
 #include <security/pam_appl.h>
 
+/* 
+   Comment the following line if your PAM library doesn't have the 
+   pam_get/putenv set of functions (i.e. PAM versions before 0.54).
+   Please tell me if you know some automatic way to determine this.
+*/
+
+/* #define HAVE_PAM_ENV_FUNCTIONS */
+
+
 #ifdef sun
 /* The Solaris 2.6 and the Linux header file differ here. */
 #define PAM_GET_ITEM_ARG3_TYPE	void **
@@ -24,7 +33,8 @@ conv_func(num_msg, msg, resp, appdata_ptr)
         struct pam_response **resp;
         void *appdata_ptr;
 {
-        int i,res_cnt,len,res;
+        int i,res_cnt,res;
+	STRLEN len;
         struct pam_response* reply = NULL;
         SV * strSV;
         char * str;
@@ -305,6 +315,12 @@ int arg;
 #else
 	return 0;
 #endif
+    else if (strcmp(name, "HAVE_PAM_ENV_FUNCTIONS") == 0)
+#if defined(HAVE_PAM_ENV_FUNCTIONS)
+	return 1;
+#else
+	return 0;
+#endif
 /*
     else if (strcmp(name, "HAVE_PAM_SYSTEM_LOG") == 0)
 #if defined(HAVE_PAM_SYSTEM_LOG)
@@ -397,6 +413,7 @@ pam_strerror(pamh, errnum)
 	OUTPUT:
 	RETVAL
 
+#if defined(HAVE_PAM_ENV_FUNCTIONS)
 int
 pam_putenv(pamh, name_value)
 	pam_handle_t * pamh
@@ -430,6 +447,32 @@ _pam_getenvlist(pamh)
 	  EXTEND(sp, c);
 	  for (i = 0; i < c; i++)
 	      PUSHs(sv_2mortal(newSVpv(res[i],0)));
+
+#else
+
+int
+pam_putenv(pamh, name_value)
+	pam_handle_t * pamh
+	const char *	name_value
+	CODE:
+	  not_here("pam_putenv");
+
+const char *
+pam_getenv(pamh, name)
+	pam_handle_t *	pamh
+	const char *	name
+	CODE:
+	  not_here("pam_getenv");
+
+
+void
+_pam_getenvlist(pamh)
+	pam_handle_t *	pamh
+	CODE:
+	  not_here("pam_getenvlist");
+
+
+#endif
 
 
 #if defined(HAVE_PAM_FAIL_DELAY)

@@ -1,8 +1,9 @@
-                                  Authen::PAM 
 
-                                  Version 0.02
+				Authen::PAM 
 
-                                  09 Jun 1998
+				Version 0.03
+
+				06 Oct 1998
 
 
 	Copyright (c) 1998 Nikolay Pelov. All rights reserved.
@@ -22,11 +23,10 @@ PREREQUISITES
 Before you can build Authen::PAM you need to have the following
 thing installed on your system:
 
-    * Perl, version 5.004_04
+    * Perl, version 5
     * PAM library (either Linux-PAM or Solaris 2.6 PAM library)
 
   The Linux-PAM home page is http://www.kernel.org/pub/linux/libs/pam.
-
 
 BUILDING AND INSTALLING THE MODULE
 ----------------------------------
@@ -34,7 +34,12 @@ BUILDING AND INSTALLING THE MODULE
 Assuming you have met all the prerequisites, building the module should
 be relatively straightforward.
 
-The module can now be built using this sequence of commands:
+First if you are using a version of the PAM older then 0.54 (without the
+functions for manipulating the environment) you must edit the file PAM.xs 
+and comment the line defining PAM_HAVE_ENV_FUNCTIONS. (If you know an 
+automatic way to determine this situation I will be glad to hear it.)
+
+Then the module can now be built using this sequence of commands:
 
     perl Makefile.PL
     make
@@ -70,29 +75,7 @@ delete the line with the error (715).
 
 The other solution is to patch you xsubpp compiler. Go to your perl lib
 directory (usually /usr/lib/perl5 or /usr/local/lib/perl5) and apply the
-following patch:
-
-
---- ExtUtils/xsubpp     Thu Jun  4 14:46:59 1998
-+++ ExtUtils/xsubpp.new Thu Jun  4 14:46:08 1998
-@@ -87,7 +87,7 @@
-
- # Global Constants
-
--$XSUBPP_version = "1.9504";
-+$XSUBPP_version = "1.9505";
-
- my ($Is_VMS, $SymSet);
- if ($^O eq 'VMS') {
-@@ -294,7 +294,7 @@
-     do { $_ = shift(@line) } while !/\S/ && @line;
-
-     print("#line ", $line_no[@line_no - @line -1], " \"$filename\"\n")
--       if $WantLineNumbers && !/^\s*#\s*line\b/;
-+       if $WantLineNumbers && !/^\s*#\s*line\b/ && !/^#if XSubPPtmp/;
-     for (;  defined($_) && !/^$BLOCK_re/o;  $_ = shift(@line)) {
-        print "$_\n";
-     }
+patch xsubpp-1.9504.patch.
 
 
 AUTHOR
@@ -101,4 +84,4 @@ AUTHOR
 Nikolay Pelov <nikip@iname.com>
 
 The original distribution site of this module is 
-http://serv.iinf.bg/~nikip
+http://www.cs.kuleuven.ac.be/~pelov/pam

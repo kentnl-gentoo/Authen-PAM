@@ -42,10 +42,10 @@ require DynaLoader;
 
 	PAM_PROMPT_ECHO_OFF PAM_PROMPT_ECHO_ON PAM_ERROR_MSG PAM_TEXT_INFO
 
-	HAVE_PAM_FAIL_DELAY
+	HAVE_PAM_FAIL_DELAY HAVE_PAM_ENV_FUNCTIONS
 );
 
-$VERSION = '0.02';
+$VERSION = '0.03';
 
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()
@@ -100,6 +100,8 @@ sub DESTROY {
     my $pamh = shift;
     my $retval = pam_end($pamh, 0);
 }
+
+# Default conversation function
 
 sub pam_default_conv {
     my @res;
@@ -162,12 +164,15 @@ Authen::PAM - Perl interface to PAM library
   $retval = pam_set_item($pamh, $item_type, $item);
   $retval = pam_get_item($pamh, $item_type, $item);
 
-  $retval = pam_putenv($pamh, $name_value);
-  $val = pam_getenv($pamh, $name);
-  %env = pam_getenvlist($pamh);
+  if (HAVE_PAM_ENV_FUNCTIONS) {
+      $retval = pam_putenv($pamh, $name_value);
+      $val = pam_getenv($pamh, $name);
+      %env = pam_getenvlist($pamh);
+  }
 
-  if (HAVE_PAM_FAIL_DELAY)
+  if (HAVE_PAM_FAIL_DELAY) {
 	$retval = pam_fail_delay($pamh, $musec_delay);
+  }
 
 =head1 DESCRIPTION
 
@@ -190,6 +195,12 @@ it is advisable to use the latest one.
 When this module supports some of the additional features of the PAM
 library (e.g. pam_fail_delay) then the coresponding HAVE_PAM_XXX
 constant will have a value 1 otherwise it will return 0.
+
+For compatibility with older PAM libraries I have added the constant
+HAVE_PAM_ENV_FUNCTIONS which is true if your PAM library has the set
+of functions for handling the environment variables (pam_putenv, pam_getenv,
+pam_getenvlist).
+
 
 =head2 Object Oriented Style
 
@@ -245,8 +256,8 @@ or the same thing but using OO style:
 
 When starting the PAM the user must supply a conversation function.
 It is used for interaction between the PAM modules and the user.
-The function takes as arguments a list of pairs ($msg_type, $msg)
-and must return a list with the same number of pairs ($resp_retcode, $resp)
+The argument of the function is a list of pairs ($msg_type, $msg)
+and it must return a list with the same number of pairs ($resp_retcode, $resp)
 with replies to the input messages. For now the $resp_retcode is not used 
 and must be always set to 0.  In addition the user must append to
 the end of the resulting list the return code of the conversation function
@@ -257,12 +268,12 @@ Here is a sample form of the PAM conversation function:
 sub pam_conv_func {
     my @res;
     while ( @_ ) {
-        my $code = shift;
+        my $msg_type = shift;
         my $msg = shift;
 
         print $msg;
 
-	# switch ($code) { obtain value for $ans; }
+	// switch ($msg_type) { obtain value for $ans; }
       
         push @res, 0;
         push @res, $ans;
@@ -275,7 +286,7 @@ sub pam_conv_func {
 =head1 COMPATIBILITY
 
 This module was tested with the following versions of the Linux-PAM library:
-0.56, 0.59 and 0.65.
+0.65, 0.59, 0.56 and 0.50.
 
 This module still does not support some of the new Linux-PAM 
 functions such as pam_system_log. This will be added in the near future

@@ -7,3 +7,8 @@ Revision history for Perl extension Authen::PAM.
 	- the module is now compatible with Solaris 2.6 PAM library
 	- added object oriented interface
 	- added default value for $flags argument in most of the functions
+
+0.03  Oct 06 1998
+	- fixed some compiler warnings
+	- added support for earliest versions of Linux-PAM without env 
+	  functions (those before version 0.54)
