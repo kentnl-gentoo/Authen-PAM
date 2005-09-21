@@ -1,12 +1,12 @@
 
 				Authen::PAM 
 
-				Version 0.15
+				Version 0.16
 
-				2004-Nov-8
+				2005-Sep-20
 
 
-	Copyright (c) 1998-2004 Nikolay Pelov. All rights reserved.
+	Copyright (c) 1998-2005 Nikolay Pelov. All rights reserved.
 	This program is free software; you can redistribute it and/or
 	modify it under the same terms as Perl itself.
 
@@ -16,7 +16,7 @@ DESCRIPTION
 
 This module provides a Perl interface to the PAM library.
 
-Home site: <http://www.cs.kuleuven.ac.be/~pelov/pam/>
+Home site: <http://nik.pelov.name/Authen-PAM/>
 
 After installing the module you can read a small faq with
 examples by typing 'perldoc Authen::PAM::FAQ'.
@@ -60,14 +60,13 @@ However, besides changing the compiler, it is still not possible to change
 any other options (for example CFLAGS). If you want to do this then you
 should edit by hand the generated Makefile.
 
-If you have any problems in building and installing the module then you
-should first check on the home page of the Authen::PAM module at address
-http://www.cs.kuleuven.ac.be/~pelov/pam/ for the latest development version
-(if any) which could possibly fix your problems. If none is available or the
-problems remain then you can write me a mail which includes the following
-information:
+If you have any problems in building and installing the module then
+you should first check on the home page of the Authen::PAM module for
+the latest development version (if any) which could possibly fix your
+problems. If none is available or the problems remain then you can
+write me a mail which includes the following information:
   * the version of your unix - `uname -a'
-  * the version of the perl - `perl -v'
+  * the configuration of the perl - `perl -V'
   * if you are on linux:
     - the name and version of the distribution you are using
     - the version of the pam - `ls /lib/libpam.so*' or `ls /usr/lib/libpam.so*'
@@ -150,5 +149,5 @@ AUTHOR
 
   Nikolay Pelov <NIKIP at cpan dot org>
 
-  Web page: <http://www.cs.kuleuven.ac.be/~pelov/pam/>
+  Web page: <http://nik.pelov.name/Authen-PAM/>
 

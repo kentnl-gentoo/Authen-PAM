@@ -1,6 +1,6 @@
 #This is a dummy file so CPAN will find a VERSION
 package Authen::PAM;
-$VERSION = "0.15";
+$VERSION = "0.16";
 #This is to make sure require will return an error
 0;
 __END__
@@ -183,7 +183,7 @@ Nikolay Pelov <NIKIP at cpan.org>
 
 =head1 COPYRIGHT
 
-Copyright (c) 1998-2004 Nikolay Pelov. All rights reserved. This
+Copyright (c) 1998-2005 Nikolay Pelov. All rights reserved. This
 program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
 

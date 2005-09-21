@@ -1,5 +1,15 @@
 Revision history for Perl extension Authen::PAM.
 
+0.16  2005-Sep-20
+	- export the PAM_BINARY_PROMPT message type
+	- minor fix in the configure script for testing DL_LOAD_FLAGS
+	- added an entry in the FAQ about PAM_AUTHTOK and PAM_OLDAUTHTOK
+	- some code cleanup by Alexey Tourbin
+	- changed the typemap of pam_handle_t* to T_PTRREF;
+	  this should fix warnings and some segmentation faults when using
+	  64-bit ints (thanks to Walter Vaughan)
+	- restored test 11 for the object oriented interface
+
 0.15  2004-Nov-8
 	- small changes to the FAQ
 	- fixed pam_start to pass NULL to PAM if no user is given

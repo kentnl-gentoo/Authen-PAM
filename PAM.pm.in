@@ -5,7 +5,7 @@ use strict;
 #no strict "subs";
 
 use Carp;
-use POSIX;
+use POSIX qw(EINVAL ENOSYS ECHO TCSANOW);
 use vars qw($VERSION @ISA %EXPORT_TAGS $AUTOLOAD);
 
 #use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $AUTOLOAD);
@@ -51,7 +51,7 @@ require DynaLoader;
 	PAM_REFRESH_CRED PAM_CHANGE_EXPIRED_AUTHTOK
 
 	PAM_PROMPT_ECHO_OFF PAM_PROMPT_ECHO_ON PAM_ERROR_MSG
-	PAM_TEXT_INFO PAM_RADIO_TYPE
+	PAM_TEXT_INFO PAM_RADIO_TYPE PAM_BINARY_PROMPT
 
 	HAVE_PAM_FAIL_DELAY HAVE_PAM_ENV_FUNCTIONS
     )],
@@ -140,13 +140,13 @@ sub pam_default_conv {
 	    my $termios = POSIX::Termios->new;
 	    $termios->getattr(1);
             my $c_lflag = $termios->getlflag;
-            $termios->setlflag($c_lflag & ~POSIX::ECHO );
-            $termios->setattr(1, POSIX::TCSANOW) ;
+            $termios->setlflag($c_lflag & ~ECHO);
+            $termios->setattr(1, TCSANOW) ;
 
             chomp( $ans = <STDIN> ); print "\n";
 
 	    $termios->setlflag($c_lflag);
-	    $termios->setattr(1, POSIX::TCSANOW );
+	    $termios->setattr(1, TCSANOW);
         }
         elsif ($code == PAM_PROMPT_ECHO_ON() ) { chomp( $ans = <STDIN> ); }
         elsif ($code == PAM_ERROR_MSG() )      { print STDERR "$msg\n"; }
@@ -349,7 +349,7 @@ Nikolay Pelov <NIKIP at cpan.org>
 
 =head1 COPYRIGHT
 
-Copyright (c) 1998-2004 Nikolay Pelov. All rights reserved. This
+Copyright (c) 1998-2005 Nikolay Pelov. All rights reserved. This
 program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
 

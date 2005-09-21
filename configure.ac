@@ -1,6 +1,6 @@
 dnl -*-m4-*-
 
-AC_INIT([Authen::PAM],[0.15],[],[Authen-PAM])
+AC_INIT([Authen::PAM],[0.16],[],[Authen-PAM])
 
 AC_PREREQ([2.50])
 
@@ -74,15 +74,19 @@ AC_CHECK_PAM_CONST(PAM_REINITIALIZE_CRED)
 AC_CHECK_PAM_CONST(PAM_INCOMPLETE)
 AC_CHECK_PAM_CONST(PAM_MODULE_UNKNOWN)
 AC_CHECK_PAM_CONST(PAM_RADIO_TYPE)
+AC_CHECK_PAM_CONST(PAM_BINARY_PROMPT)
 
 # Checks if the dl library supports the RTLD_GLOBAL flag
 # but only if perl was compiled with the dl_open library
 
-if perl -V:dlsrc | grep dlopen >/dev/null 2>&1; then
+if perl -V:dlsrc | grep dlopen >/dev/null 2>&1
+then
   AC_CHECK_DECL([RTLD_GLOBAL],
                 [DL_LOAD_FLAGS='sub dl_load_flags { 0x01 }'],
                 [DL_LOAD_FLAGS=''],
 		[#include<dlfcn.h>])
+else
+  DL_LOAD_FLAGS=''
 fi
 AC_SUBST(DL_LOAD_FLAGS)
 

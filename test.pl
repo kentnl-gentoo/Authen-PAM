@@ -10,7 +10,7 @@ END { print "not ok 1\n" unless $loaded; }
 
 use strict;
 use vars qw($loaded $fd_status);
-use POSIX;
+use POSIX qw(ttyname);
 use Authen::PAM; # qw(:functions :constants);
 
 $loaded = 1;
@@ -150,14 +150,14 @@ sub my_fail_delay {
   ok(10, $res == PAM_SUCCESS());
 
   # Checking the OO interface
-# $pamh = new Authen::PAM($pam_service, $login_name);
-# ok(11, ref($pamh));
+  $pamh = new Authen::PAM($pam_service, $login_name);
+  ok(11, ref($pamh));
 #
 #  $res = $pamh->pam_authenticate;
 #  $res = $pamh->pam_chauthtok;
 #  pam_ok(111, $pamh, $res);
 #
-# $pamh = 0;  # this will destroy the object (and call pam_end)
+  $pamh = 0;  # this will destroy the object (and call pam_end)
 
   print "\n";
 

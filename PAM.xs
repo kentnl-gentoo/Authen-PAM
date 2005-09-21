@@ -61,7 +61,7 @@ typedef struct perl_pam_data sPerlPamData;
 /* 
  * Gets conv_struct->appdata_ptr and casts it as a sPerlPamData
  */
-sPerlPamData* 
+static sPerlPamData* 
 get_perl_pam_data(pamh)
 pam_handle_t *pamh;
 {
@@ -184,7 +184,7 @@ my_conv_func(num_msg, msg, resp, appdata_ptr)
  *
  * Works only on Linux-PAM >= 0.68
  */
-void
+static void
 my_delay_func(status, delay, appdata_ptr)
 int status;
 unsigned int delay;
@@ -407,6 +407,12 @@ int arg;
       else if (strcmp(name, "RADIO_TYPE") == 0)
       #if defined(HAVE_PAM_RADIO_TYPE)
 	  return PAM_RADIO_TYPE;
+      #else
+	  goto not_there;
+      #endif
+      else if (strcmp(name, "BINARY_PROMPT") == 0)
+      #if defined(HAVE_PAM_BINARY_PROMPT)
+	  return PAM_BINARY_PROMPT;
       #else
 	  goto not_there;
       #endif

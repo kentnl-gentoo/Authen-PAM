@@ -8,7 +8,7 @@ perldoc Authen::PAM::FAQ
 
 =head1 VERSION
 
-This document is currently at version I<0.04>, as of I<Nov 8, 2004>
+This document is currently at version I<0.05>, as of I<May 4, 2005>
 
 =head1 DESCRIPTION
 
@@ -33,7 +33,7 @@ then usually you will not be asked for it. Here is a simple example
 how to do this:
 
   use Authen::PAM;
-  use POSIX;
+  use POSIX qw(ttyname);
 
   $service = "login";
   $username = "foo";
@@ -132,6 +132,17 @@ use for additional test or for debugging purposes, e.g.
   }
 
 
+=head2 3. Why are the constants PAM_AUTHTOK and PAM_OLDAUTHTOK not avaliable?
+
+The PAM_AUTHTOK and PAM_OLDAUTHTOK items can be used to pass
+authentication tokens (passwords) from one module to another. However,
+they are avaliable only to PAM modules and not to PAM applicatinos. If
+you have a special setup in which you really need to preset the
+password from the application (e.g. using a radius server) then you
+can use the pam_set_authtok module avaliable from
+L<http://www.uni-hohenheim.de/~schaefer/linux/pam/pam_set_authtok.html>.
+
+
 =head1 SEE ALSO
 
 L<Authen::PAM>
@@ -142,7 +153,7 @@ Nikolay Pelov <NIKIP at cpan.org>
 
 =head1 COPYRIGHT
 
-Copyright (c) 1998-2004 Nikolay Pelov. All rights reserved. This file
+Copyright (c) 1998-2005 Nikolay Pelov. All rights reserved. This file
 is part of the Authen::PAM library. This library is free software; you
 can redistribute it and/or modify it under the same terms as Perl
 itself.
