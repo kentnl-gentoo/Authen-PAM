@@ -10,7 +10,7 @@ sub configure {
 
     # returns a reference to anonymous hash which is then interpreted as
     # additional options to the WriteMakeFile
-    $options = require "pam.cfg";
+    $options = require "./pam.cfg";
 
     if ( $Config{'osname'} eq 'solaris' && $Config{'osvers'} eq '2.6') {
       print "Adding a workaround for a bug in the Solaris 2.6 pam library\n";
